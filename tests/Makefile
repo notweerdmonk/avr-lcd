@@ -23,49 +23,19 @@
 
 .DEFAULT_GOAL = all
 
-PROJECT_ROOT := $(realpath ../)
+SUBDIRS := $(filter-out Makefile run_tests %.md,$(wildcard *))
 
-ifeq ($(INCLUDE_DIRS),)
-INCLUDE_DIRS := $(PROJECT_ROOT)/config $(PROJECT_ROOT)/include $(PROJECT_ROOT)/port
-INCLUDE_DIRS := $(foreach i, $(INCLUDE_DIRS), $(realpath $(i)))
-endif
+.PHONY: $(SUBDIRS)
 
-INCLUDE_DIRS += $(realpath .)
+all: $(SUBDIRS)
 
-INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
-INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
+$(SUBDIRS):
+	$(MAKE) -C $@
 
-SOURCES := lcd.c
-
-OBJECTS = $(SOURCES:.c=.o)
-C_DEPS = $(SOURCES:.c=.d)
-PREPROCESSOR_OUTPUTS = $(SOURCES:.c=.i)
-ASSEMBLY_OUTPUTS = $(SOURCES:.c=.s)
-STACK_USAGE_REPORTS = $(SOURCES:.c=.su)
-ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
-
-LIB_DIR := $(PROJECT_ROOT)/lib
-
-LIB_NAME = hd44780
-LIB = lib$(LIB_NAME).a
-
-include $(PROJECT_ROOT)/Makefile.common
-
-ARCHIVE := $(AVR_AR) rc
-
-all: $(LIB_DIR)/$(LIB)
-
-$(OBJECTS): $(SOURCES) $(INCLUDE_HEADERS)
-
-$(LIB): $(OBJECTS)
-	$(ARCHIVE) $(LIB) $(OBJECTS)
-
-$(LIB_DIR):
-	mkdir -p $(LIB_DIR)
-
-$(LIB_DIR)/$(LIB): $(LIB) | $(LIB_DIR)
-	cp $(LIB) $(LIB_DIR)
+help:
+	$(MAKE) -C $(firstword $(SUBDIRS)) help
 
 clean:
-	rm -f $(LIB) $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUT) \
-		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS)
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done

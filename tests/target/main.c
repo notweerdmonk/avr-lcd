@@ -77,18 +77,24 @@ int main()
                                        });
 #else
   lcd_set_pins(&(struct hardware_repr) { 
-                                         .ctl.rs = 4, //0,
-                                         .ctl.en = 5, //1,
-                                         .ctl.rw = 6, //PIN_NC,
-                                         .ctl.bl = PIN_NC, //2,
-                                         .data.pins.d0 = PIN_NC,
-                                         .data.pins.d1 = PIN_NC,
-                                         .data.pins.d2 = PIN_NC,
-                                         .data.pins.d3 = PIN_NC,
-                                         .data.pins.d4 = 0, //19,
-                                         .data.pins.d5 = 1, //20,
-                                         .data.pins.d6 = 2, //21,
-                                         .data.pins.d7 = 3, //22, 
+                                         .ctl.rs = 0,
+                                         .ctl.en = 1,
+                                         .ctl.rw = PIN_NC,
+                                         .ctl.bl = 2,
+                                         //.ctl.rs = 4,
+                                         //.ctl.en = 5,
+                                         //.ctl.rw = 6,
+                                         //.ctl.bl = PIN_NC,
+                                         //.data.pins.d0 = PIN_NC,
+                                         //.data.pins.d1 = PIN_NC,
+                                         //.data.pins.d2 = PIN_NC,
+                                         //.data.pins.d3 = PIN_NC,
+                                         //.data.pins.d4 = 0, //19,
+                                         //.data.pins.d5 = 1, //20,
+                                         //.data.pins.d6 = 2, //21,
+                                         //.data.pins.d7 = 3, //22, 
+                                         //.data.d4 = 0
+                                         .data.d4 = 4
                                        });
 #endif
 
@@ -109,6 +115,8 @@ int main()
 #endif
   lcd_put_string("hello not-devs");
   lcd_set_cursor(1, 0);
+  lcd_put_string("^_^");
+  lcd_set_cursor(1, 13);
   lcd_put_string("^_^");
   lcd_display();
 

@@ -2,6 +2,8 @@
 #ifndef PORT_MEGA328P_H
 #define PORT_MEGA328P_H
 
+#include <io.h>
+
 #ifdef __AVR_ATmega328P__
 
 /* TODO: Use BITMASK */

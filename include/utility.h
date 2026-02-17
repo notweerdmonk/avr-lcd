@@ -4,23 +4,35 @@
  * @brief header file with utility and helper macros
  */
 
-#ifndef _UTILITY_H_
-#define _UTILITY_H_
-
-#include <common.h>
-
-#define DELAY_MS(x) _delay_ms(x)
-#define DELAY_US(x) _delay_us(x)
+#ifndef _AVR_USER_UTILITY_H_
+#define _AVR_USER_UTILITY_H_
 
 #define TIMER_VAL_FROM_SEC(x)   (x)*1000
 
+/*****************************************************************************/
+/* Attributes                                                                */
+/*****************************************************************************/
+#define UNUSED_FUNCTION __attribute__ (( unused ))
+
+#define UNUSED_VARIABLE __attribute__ (( unused ))
+
+#define DEPRECATED_FUNCTION(msg) __attribute__ (( deprecated(msg) ))
+
+#define DEPRECATED_VARIABLE(msg) __attribute__ (( deprecated(msg) ))
+
+/*****************************************************************************/
+/* Preprocessor utilities                                                    */
+/*****************************************************************************/
 #define CONCAT_EXPAND(A, B) A ## B
 #define CONCAT(A, B) CONCAT_EXPAND(A, B)
 
 #define STRINGIFY_HELPER(s) #s
 #define STRINGIFY(s) STRINGIFY_HELPER(s)
 
-/* get 8-bit mask from 8-bit value */
+/*****************************************************************************/
+/* Bitmask manipulation                                                      */
+/*****************************************************************************/
+/* Get 8-bit mask from 8-bit value */
 #define BITMASK(byte) \
   ({                       \
     register uint8_t mask; \
@@ -37,8 +49,6 @@
     mask;                            \
   })
 
-/* bitmask manipulation */
-/*****************************************************************************/
 #define SET_MASK(x, y)      (x) |= (y)
 #define CLR_MASK(x, y)      (x) &= ~(y)
 #define ZERO_MASK(x)        (x) = 0
@@ -46,95 +56,19 @@
 #define SET_BIT(x, y)       (x) |= BITMASK(y)
 #define CLR_BIT(x, y)       (x) &= ~BITMASK(y)
 #define GET_BIT(x, y)       ((x) & BITMASK(y))
-/*****************************************************************************/
-
-/* register manipulation */
-/*****************************************************************************/
-#define SET_DDR(x, y)       (CONCAT(DDR,x) |= (y))
-#define CLR_DDR(x, y)       (CONCAT(DDR,x) &= ~(y))
-
-#define SET_PORT(x, y)      (CONCAT(PORT,x) |= (y))
-#define CLR_PORT(x, y)      (CONCAT(PORT,x) &= ~(y))
-#define ZERO_PORT(x)        (CONCAT(PORT,x) = 0)
-#define GET_PORT(x)         (CONCAT(PORT,x))
-
-#define OUTPUT_PORT(x)      (CONCAT(DDR,x) = 0xFF)
-#define INPUT_PORT(x)       (CONCAT(DDR,x) = 0x00)
-
-#define OUTPUT_PIN(x, y)    (CONCAT(DDR,x) |= (BITMASK(y)))
-#define INPUT_PIN(x, y)     (CONCAT(DDR,x) &=	~(BITMASK(y)))
-
-#define SET_PIN(x, y)       (CONCAT(PORT,x) |= (BITMASK(y)))
-#define CLR_PIN(x, y)       (CONCAT(PORT,x) &= ~(BITMASK(y)))
-#define GET_PIN(x, y)       (CONCAT(PIN,x) & (BITMASK(y)))
-/*****************************************************************************/
 
 /*****************************************************************************/
-/* takes number literals as argument for bit */
-#define OUTPUT_PIN_IMM(x, y) \
-  asm volatile(                               \
-      "sbi %[ddr], %[bit]\n"                  \
-      :: [ddr] "I" _SFR_IO_ADDR(CONCAT(DDR, x)), \
-      [bit] "I" (y))
-
-#define INPUT_PIN_IMM(x, y) \
-  asm volatile(                               \
-      "cbi %[ddr], %[bit]\n"                  \
-      :: [ddr] "I" _SFR_IO_ADDR(CONCAT(DDR, x)), \
-      [bit] "I" (y))
-
-/* takes number literals as argument for bit */
-#define SET_PIN_IMM(x, y) \
-  asm volatile(                                 \
-      "sbi %[port], %[bit]\n"                   \
-      :: [port] "I" _SFR_IO_ADDR(CONCAT(PORT, x)), \
-      [bit] "I" (y))
-
-#define CLR_PIN_IMM(x, y) \
-  asm volatile(                                 \
-      "cbi %[port], %[bit]\n"                   \
-      :: [port] "I" _SFR_IO_ADDR(CONCAT(PORT, x)), \
-      [bit] "I" (y))
-
-#if defined(__AVR_ATmega48__) || defined(__AVR_ATmega48A__) || \
-    defined(__AVR_ATmega48P__) || defined(__AVR_ATmega48PA__) || \
-    defined(__AVR_ATmega88__) || defined(__AVR_ATmega88A__) || \
-    defined(__AVR_ATmega88P__) || defined(__AVR_ATmega88PA__) || \
-    defined(__AVR_ATmega168__) || defined(__AVR_ATmega168A__) || \
-    defined(__AVR_ATmega168P__) || defined(__AVR_ATmega168PA__) || \
-    defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-
-#define TOGGLE_PIN(x, y)   (CONCAT(PIN, x) |= (BITMASK(y)))
-
-/* takes number literals as argument for bit */
-#define TOGGLE_PIN_IMM(x, y) \
-  asm volatile(                               \
-      "sbi %[pin], %[bit]\n"                  \
-      :: [pin] "I" _SFR_IO_ADDR(CONCAT(PIN, x)), \
-      [bit] "I" (y))
-
-#else
-
-#define TOGGLE_PIN(x, y)   (CONCAT(PORT,x) ^= (BITMASK(y)))
-
-#endif
-
-#define POLL_PIN_LEVEL(port, pin, state) \
-  ({                                                      \
-    static uint8_t _debounce = 0;                         \
-    if ( (CONCAT(PIN,port) & (BITMASK(pin))) == state ) \
-      {if (++_debounce == -1) _debounce = 3;}             \
-    else _debounce = 0;                                   \
-    (_debounce >= 3) ? TRUE : FALSE;                      \
-  })
+/* Atomic operations                                                         */
 /*****************************************************************************/
-
 #define ATOMIC_COPY_BYTE(desc, src) \
   do { cli(); dest = src; sei(); } while (0)
 
 #define ATOMIC_COPY_WORD(dest, src) \
   do { cli(); dest = src; sei(); } while (0)
 
+/*****************************************************************************/
+/* EEPROM memory access                                                      */
+/*****************************************************************************/
 #define GET_PROGMEM_STR(pgm_ptr) \
   ({                                                   \
      char __buf[128];                                  \
@@ -142,6 +76,9 @@
      __buf;                                            \
   })
 
+/*****************************************************************************/
+/* Data format conversion                                                    */
+/*****************************************************************************/
 #define HEX_TO_BYTE(hex_ptr) \
   (uint8_t)( (hex_to_nibble(hex_ptr) << 4) | \
              (hex_to_nibble(hex_ptr + 1)) )
@@ -152,20 +89,39 @@
               (hex_to_nibble(hex_ptr + 2) << 4) | \
               (hex_to_nibble(hex_ptr + 3)) )
 
-/* functions */
-/*****************************************************************************/
 void byte_to_hex(uint8_t byte, char *str);
 
 void word_to_hex(uint16_t word, char *str);
 
 uint8_t hex_to_nibble(const char *hex);
-/*****************************************************************************/
 
-#define sleep(ms) DELAY_MS(ms)
+#ifdef AVR_UTILITY_IMPL
 
-typedef enum _pwm_channel_id {
-  PWM_CHANNEL_A,
-  PWM_CHANNEL_B,
-} pwm_channel_id_t;
+static const char PROGMEM hex_lut[] = \
+  {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-#endif /* _UTILITY_H_ */
+void byte_to_hex(uint8_t byte, char *str) {
+  *str++ = pgm_read_byte(&hex_lut[(byte >> 4) & 0xf]);
+  *str++ = pgm_read_byte(&hex_lut[byte & 0xf]);
+  *str = 0;
+}
+
+void word_to_hex(uint16_t word, char *str) {
+  *str++ = pgm_read_byte(&hex_lut[(word >> 12) & 0xf]);
+  *str++ = pgm_read_byte(&hex_lut[(word >> 8) & 0xf]);
+  *str++ = pgm_read_byte(&hex_lut[(word >> 4) & 0xf]);
+  *str++ = pgm_read_byte(&hex_lut[word & 0xf]);
+  *str = 0;
+}
+
+uint8_t hex_to_nibble(const char *hex) {
+  uint8_t byte = *hex;
+  if (byte >= 'a') byte = (byte - 'a') + 10;
+  else if (byte >= 'A') byte = (byte - 'A') + 10;
+  else byte -= '0';
+  return byte;
+}
+
+#endif /* AVR_UTILITY_IMPL */
+
+#endif /* _AVR_USER_UTILITY_H_ */

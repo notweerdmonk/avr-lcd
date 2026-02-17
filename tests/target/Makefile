@@ -1,5 +1,5 @@
 #
-# avr-uart - UART module for AVR microcontrollers
+# avr-uart - UART module for AtMEGA microcontrollers
 # Copyright (C) 2026 notweerdmonk
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +23,7 @@
 
 .DEFAULT_GOAL = all
 
-PROJECT_ROOT := $(realpath ../)
+PROJECT_ROOT := $(realpath ../../)
 
 ifeq ($(INCLUDE_DIRS),)
 INCLUDE_DIRS := $(PROJECT_ROOT)/config $(PROJECT_ROOT)/include $(PROJECT_ROOT)/port
@@ -35,8 +35,13 @@ INCLUDE_DIRS += $(realpath .)
 INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
 INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
 
-SOURCES := lcd.c
+TARGET_NAME = main
+TARGET = $(TARGET_NAME).elf
+TARGET_HEX = $(TARGET_NAME).hex
 
+include $(PROJECT_ROOT)/Makefile.common
+
+SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 C_DEPS = $(SOURCES:.c=.d)
 PREPROCESSOR_OUTPUTS = $(SOURCES:.c=.i)
@@ -46,26 +51,36 @@ ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
 
 LIB_DIR := $(PROJECT_ROOT)/lib
 
-LIB_NAME = hd44780
-LIB = lib$(LIB_NAME).a
+LDFLAGS += -L$(LIB_DIR)
 
-include $(PROJECT_ROOT)/Makefile.common
+LDLIBS = -lhd44780
 
-ARCHIVE := $(AVR_AR) rc
-
-all: $(LIB_DIR)/$(LIB)
+all: $(TARGET_HEX) size
 
 $(OBJECTS): $(SOURCES) $(INCLUDE_HEADERS)
 
-$(LIB): $(OBJECTS)
-	$(ARCHIVE) $(LIB) $(OBJECTS)
+build-lib:
+	$(MAKE) -C $(PROJECT_ROOT) $@
 
-$(LIB_DIR):
-	mkdir -p $(LIB_DIR)
+$(TARGET): $(OBJECTS) build-lib
+	$(COMPILE) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
 
-$(LIB_DIR)/$(LIB): $(LIB) | $(LIB_DIR)
-	cp $(LIB) $(LIB_DIR)
+# TODO: add EEPROM section
+$(TARGET_HEX): $(TARGET)
+	$(AVR_OBJCOPY) -j .text -j .data -O ihex $^ $@
+
+flash: all
+	$(AVRDUDE) -U flash:w:$(TARGET_HEX):i
+
+install: flash
+
+fuse:
+	$(AVRDUDE) $(FUSES)
+
+# TODO: flash bootloader
+load: all
+	@echo Nothing to do
 
 clean:
-	rm -f $(LIB) $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUT) \
-		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS)
+	rm -f $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUT) \
+		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS) $(TARGET_HEX) $(TARGET)

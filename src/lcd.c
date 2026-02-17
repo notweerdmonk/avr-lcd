@@ -4,9 +4,9 @@
  * #brief HD44780 LCD module driver
  */
 
-#include <common.h>
-#include <utility.h>
-//#include <coroutine.h>
+#include <avr/io.h>
+#include <util/delay.h>
+
 #include <lcd.h>
 #include <port.h>
 
@@ -58,10 +58,8 @@ static struct lcd lcd;
     defined LCD_USE_NONCONTIGUOUS_DATA_PINS \
   )
 
-#ifndef LCD_4BIT
-
 static
-void set_data_port_lower_nibble(
+void lcd_set_data_port_lower_nibble(
     volatile uint8_t *port_addr,
     struct hardware_repr *p_hw,
     uint8_t byte
@@ -93,10 +91,8 @@ void set_data_port_lower_nibble(
   }
 }
 
-#endif /* !LCD_4BIT */
-
 static
-void set_data_port_upper_nibble(
+void lcd_set_data_port_upper_nibble(
     volatile uint8_t *port_addr,
     struct hardware_repr *p_hw,
     uint8_t byte
@@ -106,22 +102,22 @@ void set_data_port_upper_nibble(
     return;
   }
 
-  if (byte & 0x10) {
+  if (byte & 0x01) {
     *port_addr |= (1 << p_hw->data.pins.d4);
   } else {
     *port_addr &= ~(1 << p_hw->data.pins.d4);
   }
-  if (byte & 0x20) {
+  if (byte & 0x02) {
     *port_addr |= (1 << p_hw->data.pins.d5);
   } else {
     *port_addr &= ~(1 << p_hw->data.pins.d5);
   }
-  if (byte & 0x40) {
+  if (byte & 0x04) {
     *port_addr |= (1 << p_hw->data.pins.d6);
   } else {
     *port_addr &= ~(1 << p_hw->data.pins.d6);
   }
-  if (byte & 0x80) {
+  if (byte & 0x08) {
     *port_addr |= (1 << p_hw->data.pins.d7);
   } else {
     *port_addr &= ~(1 << p_hw->data.pins.d7);
@@ -135,10 +131,8 @@ void set_data_port_upper_nibble(
 
 #if defined LCD_RUNTIME_HW_REPR_SEL || defined LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-#ifndef LCD_4BIT
-
 static
-void set_data_pins_lower_nibble(
+void lcd_set_data_pins_lower_nibble(
     struct hardware_repr *p_hw,
     uint8_t byte
   ) {
@@ -169,10 +163,8 @@ void set_data_pins_lower_nibble(
   }
 }
 
-#endif /* !LCD_4BIT */
-
 static
-void set_data_pins_upper_nibble(
+void lcd_set_data_pins_upper_nibble(
     struct hardware_repr *p_hw,
     uint8_t byte
   ) {
@@ -181,22 +173,22 @@ void set_data_pins_upper_nibble(
     return;
   }
 
-  if (byte & 0x10) {
+  if (byte & 0x01) {
     SET_PIN_NUMBER(p_hw->data.pins.d4);
   } else {
     CLR_PIN_NUMBER(p_hw->data.pins.d4);
   }
-  if (byte & 0x20) {
+  if (byte & 0x02) {
     SET_PIN_NUMBER(p_hw->data.pins.d5);
   } else {
     CLR_PIN_NUMBER(p_hw->data.pins.d5);
   }
-  if (byte & 0x40) {
+  if (byte & 0x04) {
     SET_PIN_NUMBER(p_hw->data.pins.d6);
   } else {
     CLR_PIN_NUMBER(p_hw->data.pins.d6);
   }
-  if (byte & 0x80) {
+  if (byte & 0x08) {
     SET_PIN_NUMBER(p_hw->data.pins.d7);
   } else {
     CLR_PIN_NUMBER(p_hw->data.pins.d7);
@@ -285,11 +277,11 @@ void lcd_set_rs() {
 
 #ifdef LCD_USE_SEPARATE_PORTS
 
-  SET_PORT(LCD_RS_PORT, lcd.hw.ctl.rs);
+  SET_PIN(LCD_RS_PORT, lcd.hw.ctl.rs);
 
 #else /* !LCD_USE_SEPARATE_PORTS */
 
-  SET_PORT(LCD_CTL_PORT, lcd.hw.ctl.rs);
+  SET_PIN(LCD_CTL_PORT, lcd.hw.ctl.rs);
 
 #endif /* LCD_USE_SEPARATE_PORTS */
 
@@ -384,11 +376,11 @@ void lcd_clear_rs() {
 
 #ifdef LCD_USE_SEPARATE_PORTS
 
-  CLR_PORT(LCD_RS_PORT, lcd.hw.ctl.rs);
+  CLR_PIN(LCD_RS_PORT, lcd.hw.ctl.rs);
 
 #else /* !LCD_USE_SEPARATE_PORTS */
 
-  CLR_PORT(LCD_CTL_PORT, lcd.hw.ctl.rs);
+  CLR_PIN(LCD_CTL_PORT, lcd.hw.ctl.rs);
 
 #endif /* LCD_USE_SEPARATE_PORTS */
 
@@ -483,11 +475,11 @@ void lcd_set_en() {
 
 #ifdef LCD_USE_SEPARATE_PORTS
 
-  SET_PORT(LCD_RS_PORT, lcd.hw.ctl.en);
+  SET_PIN(LCD_RS_PORT, lcd.hw.ctl.en);
 
 #else /* !LCD_USE_SEPARATE_PORTS */
 
-  SET_PORT(LCD_CTL_PORT, lcd.hw.ctl.en);
+  SET_PIN(LCD_CTL_PORT, lcd.hw.ctl.en);
 
 #endif /* LCD_USE_SEPARATE_PORTS */
 
@@ -582,11 +574,11 @@ void lcd_clear_en() {
 
 #ifdef LCD_USE_SEPARATE_PORTS
 
-  CLR_PORT(LCD_RS_PORT, lcd.hw.ctl.en);
+  CLR_PIN(LCD_RS_PORT, lcd.hw.ctl.en);
 
 #else /* !LCD_USE_SEPARATE_PORTS */
 
-  CLR_PORT(LCD_CTL_PORT, lcd.hw.ctl.en);
+  CLR_PIN(LCD_CTL_PORT, lcd.hw.ctl.en);
 
 #endif /* LCD_USE_SEPARATE_PORTS */
 
@@ -606,13 +598,13 @@ static
 void lcd_toggle_en() {
 
   lcd_clear_en();
-  DELAY_US(1);
+  _delay_us(1);
 
   lcd_set_en();
-  DELAY_US(2000);
+  _delay_us(2000);
 
   lcd_clear_en();
-  DELAY_US(100);
+  _delay_us(100);
 
 }
 
@@ -633,13 +625,13 @@ void lcd_write_nibble(uint8_t nibble) {
     }
 
     if (lcd.hw.mode & NONCONTIGUOUS_DATA_PINS) {
-      set_data_port_upper_nibble(data_port_addr, &lcd.hw, nibble);
+      lcd_set_data_port_upper_nibble(data_port_addr, &lcd.hw, nibble);
     } else {
       *data_port_addr |= ((nibble & 0x0F) << lcd.hw.data.d4);
     }
 
   } else if (lcd.hw.mode & ABSOLUTE_PIN_NUMBERS) {
-    set_data_pins_upper_nibble(&lcd.hw, nibble);
+    lcd_set_data_pins_upper_nibble(&lcd.hw, nibble);
   }
 
 #else /* !LCD_RUNTIME_HW_REPR_SEL */
@@ -661,7 +653,7 @@ void lcd_write_nibble(uint8_t nibble) {
 
 #ifdef LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  set_data_port_upper_nibble(data_port_addr, &lcd.hw, nibble);
+  lcd_set_data_port_upper_nibble(data_port_addr, &lcd.hw, nibble);
 
 #else /* !LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
@@ -672,7 +664,7 @@ void lcd_write_nibble(uint8_t nibble) {
 
 #elif defined LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-  set_data_pins_upper_nibble(&lcd.hw, nibble);
+  lcd_set_data_pins_upper_nibble(&lcd.hw, nibble);
 
 #else /*
         * !LCD_USE_PORT_ADDR &&
@@ -683,16 +675,22 @@ void lcd_write_nibble(uint8_t nibble) {
 
 #ifdef LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  set_data_port_upper_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, nibble);
+  lcd_set_data_port_upper_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, nibble);
 
 #else /* !LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
-  SET_PORT(LCD_DATA_PORT, ((nibble & 0x0F) << lcd.hw.data.d4));
+  uint8_t data_port_byte = READ_PORT(LCD_DATA_PORT);
+  CLR_MASK(data_port_byte, 0xF << lcd.hw.data.d4);
+  SET_MASK(data_port_byte, (nibble & 0xF) << lcd.hw.data.d4);
+  WRITE_PORT(LCD_DATA_PORT, data_port_byte);
 
 #endif /* LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
 
-#endif
+#endif /*
+        * LCD_USE_PORT_ADDR ||
+        * LCD_USE_RELATIVE_PIN_NUMBERS
+        */
 
 
 #endif /* LCD_RUNTIME_HW_REPR_SEL */
@@ -702,7 +700,7 @@ void lcd_write_nibble(uint8_t nibble) {
 
 #endif /* LCD_RUNTIME_HW_REPR_SEL || LCD_4BIT */
 
-#if defined LCD_RUNTIME_HW_REPR_SEL || !defined LCD_4BIT
+#ifndef LCD_4BIT
 
 static
 void lcd_write_byte(uint8_t byte) {
@@ -719,15 +717,15 @@ void lcd_write_byte(uint8_t byte) {
     }
 
     if (lcd.hw.mode & NONCONTIGUOUS_DATA_PINS) {
-      set_data_port_lower_nibble(data_port_addr, &lcd.hw, byte);
-      set_data_port_upper_nibble(data_port_addr, &lcd.hw, byte);
+      lcd_set_data_port_lower_nibble(data_port_addr, &lcd.hw, byte);
+      lcd_set_data_port_upper_nibble(data_port_addr, &lcd.hw, byte);
     } else {
       *data_port_addr = byte;
     }
 
   } else if (lcd.hw.mode & ABSOLUTE_PIN_NUMBERS) {
-    set_data_pins_lower_nibble(&lcd.hw, byte);
-    set_data_pins_upper_nibble(&lcd.hw, byte);
+    lcd_set_data_pins_lower_nibble(&lcd.hw, byte);
+    lcd_set_data_pins_upper_nibble(&lcd.hw, byte);
   }
 
 #else /* !LCD_RUNTIME_HW_REPR_SEL */
@@ -749,8 +747,8 @@ void lcd_write_byte(uint8_t byte) {
 
 #ifdef LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  set_data_port_lower_nibble(data_port_addr, &lcd.hw, byte);
-  set_data_port_upper_nibble(data_port_addr, &lcd.hw, byte);
+  lcd_set_data_port_lower_nibble(data_port_addr, &lcd.hw, byte);
+  lcd_set_data_port_upper_nibble(data_port_addr, &lcd.hw, byte);
 
 #else /* !LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
@@ -761,8 +759,8 @@ void lcd_write_byte(uint8_t byte) {
 
 #elif defined LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-  set_data_pins_lower_nibble(&lcd.hw, byte);
-  set_data_pins_upper_nibble(&lcd.hw, byte);
+  lcd_set_data_pins_lower_nibble(&lcd.hw, byte);
+  lcd_set_data_pins_upper_nibble(&lcd.hw, byte);
 
 #else /*
        * !LCD_USE_PORT_ADDR &&
@@ -773,12 +771,12 @@ void lcd_write_byte(uint8_t byte) {
 
 #ifdef LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  set_data_port_lower_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, byte);
-  set_data_port_upper_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, byte);
+  lcd_set_data_port_lower_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, byte);
+  lcd_set_data_port_upper_nibble(&CONCAT(PORT, LCD_DATA_PORT), &lcd.hw, byte);
 
 #else /* !LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
-  SET_PORT(LCD_DATA_PORT, ((byte & 0x0F) << lcd.hw.data.d4));
+  WRITE_PORT(LCD_DATA_PORT, byte);
 
 #endif /* LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
@@ -800,12 +798,12 @@ void lcd_write(unsigned char byte) {
 
   if (lcd.hw.mode & BUS_4BIT) {
     /* write upper nibble */
-    lcd_write_nibble(byte & 0xF0);
+    lcd_write_nibble(byte >> 4);
     /* write lower nibble */
-    lcd_write_nibble(byte << 4);
+    lcd_write_nibble(byte & 0xF);
   } else {
-  /* write byte */
-  lcd_write_byte(byte);
+    /* write byte */
+    lcd_write_byte(byte);
   }
 
 #else /* !LCD_RUNTIME_HW_REPR_SEL */
@@ -813,9 +811,9 @@ void lcd_write(unsigned char byte) {
 
 #ifdef LCD_4BIT
   /* write upper nibble */
-  lcd_write_nibble(byte & 0xF0);
+  lcd_write_nibble(byte >> 4);
   /* write lower nibble */
-  lcd_write_nibble(byte << 4);
+  lcd_write_nibble(byte & 0xF);
 
 #else /* !LCD_4BIT */
   /* write byte */
@@ -845,35 +843,35 @@ void lcd_reset() {
   lcd_clear_rs();
   lcd_clear_en();
 
-  sleep(20);
+  _delay_ms(20);
 
 #ifdef LCD_RUNTIME_HW_REPR_SEL
   if (lcd.hw.mode & BUS_4BIT) {
-    lcd_write_nibble(0x03 << 4);
-    sleep(5);
+    lcd_write_nibble(0x03);
+    _delay_ms(5);
 
-    lcd_write_nibble(0x03 << 4);
-    sleep(5);
+    lcd_write_nibble(0x03);
+    _delay_ms(5);
 
-    lcd_write_nibble(0x03 << 4);
-    sleep(1);
+    lcd_write_nibble(0x03);
+    _delay_ms(1);
 
-    lcd_write_nibble(0x02 << 4);
+    lcd_write_nibble(0x02);
   }
 #else /* LCD_RUNTIME_HW_REPR_SEL */
 
 
 #ifdef LCD_4BIT
-  lcd_write_nibble(0x03 << 4);
-  sleep(5);
+  lcd_write_nibble(0x03);
+  _delay_ms(5);
 
-  lcd_write_nibble(0x03 << 4);
-  sleep(5);
+  lcd_write_nibble(0x03);
+  _delay_ms(5);
 
-  lcd_write_nibble(0x03 << 4);
-  sleep(1);
+  lcd_write_nibble(0x03);
+  _delay_ms(1);
 
-  lcd_write_nibble(0x02 << 4);
+  lcd_write_nibble(0x02);
 #endif /* LCD_4BIT */
 
 
@@ -945,26 +943,26 @@ void lcd_setup() {
     );
 #endif /* LCD_ENTRY_MODE_SET */
 
-#ifdef LCD_DISPLAY_CONTROL
-  lcd_cmd(
-      LCD_CMD_DISPLAY_CONTROL |
-#ifdef LCD_DISPLAY_ON
-      LCD_CMD_DISPLAY_ON |
-#else
-      LCD_CMD_DISPLAY_OFF |
-#endif
-#ifdef LCD_CURSOR_ON
-      LCD_CMD_CURSOR_ON |
-#else
-      LCD_CMD_CURSOR_OFF |
-#endif
-#ifdef LCD_BLINK_ON
-      LCD_CMD_BLINK_ON |
-#else
-      LCD_CMD_BLINK_OFF
-#endif
-    );
-#endif /* LCD_DISPLAY_CONTROL */
+//#ifdef LCD_DISPLAY_CONTROL
+//  lcd_cmd(
+//      LCD_CMD_DISPLAY_CONTROL |
+//#ifdef LCD_DISPLAY_ON
+//      LCD_CMD_DISPLAY_ON |
+//#else
+//      LCD_CMD_DISPLAY_OFF |
+//#endif
+//#ifdef LCD_CURSOR_ON
+//      LCD_CMD_CURSOR_ON |
+//#else
+//      LCD_CMD_CURSOR_OFF |
+//#endif
+//#ifdef LCD_BLINK_ON
+//      LCD_CMD_BLINK_ON |
+//#else
+//      LCD_CMD_BLINK_OFF
+//#endif
+//    );
+//#endif /* LCD_DISPLAY_CONTROL */
 
 #ifdef LCD_CURSOR_SHIFT
   lcd_cmd(
@@ -1044,7 +1042,7 @@ void lcd_set_ddram(uint8_t row, uint8_t col) {
 
 void lcd_display() {
   uint8_t col, row, ddram_addr = LCD_CMD_SET_DDRAMADDR;
-  bool set_ddram = FALSE;
+  bool set_ddram = false;
 
   if (lcd.clr) {
     lcd_cmd(LCD_CMD_CLEAR_DISPLAY);
@@ -1065,23 +1063,23 @@ void lcd_display() {
         if (lcd.SCREEN(col, row).is_dirty) {
           if (set_ddram) {
             lcd_cmd(ddram_addr | col);
-            set_ddram = FALSE;
+            set_ddram = false;
           }
 
           lcd_data(lcd.SCREEN(col, row).c);
-          lcd.SCREEN(col, row).is_dirty = FALSE;
+          lcd.SCREEN(col, row).is_dirty = false;
         }
         else {
           if (lcd.clr) {
             lcd.SCREEN(col, row).c = 0;
           }
 
-          set_ddram = TRUE;
+          set_ddram = true;
         }
       }
     }
 
-    lcd.clr = lcd.upt = FALSE;
+    lcd.clr = lcd.upt = false;
   }
 }
 
@@ -1441,7 +1439,7 @@ void lcd_set_pins(struct hardware_repr *p) {
 
 #else /* LCD_4BIT */
 
-  SET_DDR(LCD_DATA_PORT, (1 << p->data.d4));
+  SET_DDR(LCD_DATA_PORT, (0xF << p->data.d4));
 
 #endif
 
@@ -1455,6 +1453,8 @@ void lcd_set_pins(struct hardware_repr *p) {
   if (p->ctl.bl != PIN_NC) {
     OUTPUT_PIN(LCD_BL_PORT, p->ctl.bl);
   }
+    /* Temporary */
+    SET_PIN(LCD_BL_PORT, p->ctl.bl);
 
 #else
 
@@ -1465,6 +1465,8 @@ void lcd_set_pins(struct hardware_repr *p) {
   }
   if (p->ctl.bl != PIN_NC) {
     OUTPUT_PIN(LCD_CTL_PORT, p->ctl.bl);
+    /* Temporary */
+    SET_PIN(LCD_CTL_PORT, p->ctl.bl);
   }
 
 #endif
@@ -1509,11 +1511,11 @@ void lcd_clear() {
   //CHECK_RESOURCE_RETURN(SYS_RES_LCD);
 
   lcd.CURX = lcd.CURY = 0;
-  lcd.clr = TRUE;
+  lcd.clr = true;
 
   for (uint8_t row = 0; row < LCD_ROWS; row++) {
     for (uint8_t col = 0; col < LCD_COLS; col++) {
-      lcd.SCREEN(col, row).is_dirty = FALSE;
+      lcd.SCREEN(col, row).is_dirty = false;
     }
   }
 }
@@ -1541,7 +1543,7 @@ void lcd_put_char(char c) {
   char_buffer_t *p_pixel = &(lcd.SCREEN(lcd.CURX, lcd.CURY));
   if ((p_pixel->c != c) || lcd.clr){
     p_pixel->c = c;
-    p_pixel->is_dirty = TRUE;
+    p_pixel->is_dirty = true;
   }
 
   ++lcd.CURX;
@@ -1550,7 +1552,7 @@ void lcd_put_char(char c) {
     lcd.CURX = 0;
   }
 
-  lcd.upt = TRUE;
+  lcd.upt = true;
 }
 
 void lcd_put_string(char *str) {
@@ -1587,7 +1589,7 @@ void lcd_put_uint(unsigned int u) {
   }
 
   while (idx > 0) {
-    lcd_put_char(ASCII(digits[--idx]));
+    lcd_put_char(ascii(digits[--idx]));
   }
 }
 
@@ -1629,7 +1631,7 @@ void lcd_force_display() {
 //void* lcd_task(UNUSED_VARIABLE task_data_t data) {
 //  COROUTINE_BEGIN();
 //
-//  lcd.rdy = FALSE;
+//  lcd.rdy = false;
 //  lcd.rdy_ev = register_event();
 //
 //  COROUTINE_DELEGATE(lcd_reset);
@@ -1638,7 +1640,7 @@ void lcd_force_display() {
 //
 //  REGISTER_SOFTWARE_PWM(LCD_PWM_CHANNEL, lcd.bl, LCD_BL_VALUE);
 //
-//  lcd.rdy = TRUE;
+//  lcd.rdy = true;
 //  trigger_event(lcd.rdy_ev, EV_NOW);
 //
 //  COROUTINE_YIELD();

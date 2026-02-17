@@ -11,6 +11,11 @@
 
 #define LCD_COLS 16
 
+#define LCD_CTL_PORT B
+
+//#define LCD_DATA_PORT B
+#define LCD_DATA_PORT D
+
 #ifndef LCD_PWM_CHANNEL
 #define LCD_PWM_CHANNEL PWM_CHANNEL_A
 #endif

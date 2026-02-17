@@ -7,8 +7,16 @@
 #ifndef _LCD_H_
 #define _LCD_H_
 
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+
 #include <config.h>
-#include <common.h>
+#include <io.h>
+#include <utility.h>
+#include <ascii.h>
 #include <lcd_config.h>
 #include <lcd_commands.h>
 
@@ -144,9 +152,11 @@ typedef struct hardware_repr {
 
   } data;
 
+#else
+/*
 #elif defined LCD_USE_PORT_ADDR || defined LCD_USE_RELATIVE_PIN_NUMBERS || \
   defined LCD_USE_ABSOLUTE_PIN_NUMBERS
-
+*/
 
 #if defined LCD_USE_NONCONTIGUOUS_DATA_PINS || \
   defined LCD_USE_ABSOLUTE_PIN_NUMBERS
@@ -164,7 +174,10 @@ typedef struct hardware_repr {
     } pins;
   } data;
 
-#else /* !LCD_USE_NONCONTIGUOUS_DATA_PINS */
+#else /*
+       * !LCD_USE_NONCONTIGUOUS_DATA_PINS &&
+       * !LCD_USE_ABSOLUTE_PIN_NUMBERS
+       */
 
 
 #ifdef LCD_4BIT
@@ -176,7 +189,10 @@ typedef struct hardware_repr {
 #endif /* LCD_4BIT */
 
 
-#endif /* LCD_USE_NONCONTIGUOUS_DATA_PINS */
+#endif/*
+       * LCD_USE_NONCONTIGUOUS_DATA_PINS ||
+       * LCD_USE_ABSOLUTE_PIN_NUMBERS
+       */
 
 
 #endif /* LCD_RUNTIME_HW_REPR_SEL */

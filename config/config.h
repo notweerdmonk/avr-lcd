@@ -33,7 +33,7 @@
  */
 
 /* Define your selection here */
-#define LCD_USE_ABSOLUTE_PIN_NUMBERS
+//#define LCD_USE_ABSOLUTE_PIN_NUMBERS
 //#define LCD_USE_NONCONTIGUOUS_DATA_PINS
 //#define LCD_RUNTIME_HW_REPR_SEL
 
@@ -44,6 +44,5 @@
 
 /* Define your selection here */
 #define LCD_4BIT
-
 
 #endif /* CONFIG_H_ */
