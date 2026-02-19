@@ -13,3 +13,5 @@ gdb_history
 *.bin
 *.elf
 *.hex
+AGENTS.md
+bashrc
