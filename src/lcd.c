@@ -25,7 +25,7 @@ typedef struct char_buffer {
 } char_buffer_t;
 
 typedef struct screen_buffer {
-  struct char_buffer buffer[LCD_ROWS][LCD_COLS];
+  struct char_buffer buffer[AVR_LCD_ROWS][AVR_LCD_COLS];
 } screen_buffer_t;
 
 typedef struct lcd {
@@ -59,7 +59,7 @@ static struct lcd lcd;
 
 /*****************************************************************************/
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
 #define SCREEN(x, y) screen.buffer[y][x]
 #endif
 
@@ -67,11 +67,11 @@ static struct lcd lcd;
 #define CURY cursor.row
 
 void lcd_put_char(char c) {
-  if ((lcd.CURY >= LCD_ROWS)) {
+  if ((lcd.CURY >= AVR_LCD_ROWS)) {
     return;
   }
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
 
   char_buffer_t *p_pixel = &(lcd.SCREEN(lcd.CURX, lcd.CURY));
   if ((p_pixel->c != c) || lcd.clr){
@@ -88,7 +88,7 @@ void lcd_put_char(char c) {
 #endif
 
   ++lcd.CURX;
-  if (lcd.CURX >= LCD_COLS) {
+  if (lcd.CURX >= AVR_LCD_COLS) {
     lcd.CURY = (lcd.CURY + 1) % 2;
     lcd.CURX = 0;
   }
@@ -164,12 +164,12 @@ cursor_t lcd_get_cursor() {
 }
 
 void lcd_set_cursor(uint8_t row, uint8_t col) {
-  if ((row < LCD_ROWS) && (col < LCD_COLS)) {
+  if ((row < AVR_LCD_ROWS) && (col < AVR_LCD_COLS)) {
     lcd.CURY = row;
     lcd.CURX = col;
   }
 
-#ifndef LCD_BUFFERED
+#ifndef AVR_LCD_BUFFERED
   LCD_PREFIX(set_cursor)(row, col);
 #endif
 }
@@ -181,12 +181,12 @@ void lcd_force_clear() {
 void lcd_clear() {
   lcd.CURX = lcd.CURY = 0;
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
 
   lcd.clr = true;
 
-  for (uint8_t row = 0; row < LCD_ROWS; row++) {
-    for (uint8_t col = 0; col < LCD_COLS; col++) {
+  for (uint8_t row = 0; row < AVR_LCD_ROWS; row++) {
+    for (uint8_t col = 0; col < AVR_LCD_COLS; col++) {
       lcd.SCREEN(col, row).is_dirty = false;
     }
   }
@@ -206,7 +206,7 @@ void lcd_clear_till(uint8_t n) {
   lcd_set_cursor(prev_cursor.row, prev_cursor.col);
 }
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
 
 void lcd_display() {
   uint8_t col, row;//, ddram_addr = LCD_CMD_SET_DDRAMADDR;
@@ -219,13 +219,13 @@ void lcd_display() {
   if (lcd.upt) {
     //hd44780_cmd(ddram_addr);
 
-    for (row = 0; row < LCD_ROWS; row++) {
+    for (row = 0; row < AVR_LCD_ROWS; row++) {
       if (row > 0) {
         //ddram_addr |= LCD_CMD_DDRAMADDR_LINE2;
         //hd44780_cmd(ddram_addr);
       }
 
-      for (col = 0; col < LCD_COLS; col++) {
+      for (col = 0; col < AVR_LCD_COLS; col++) {
         if (lcd.SCREEN(col, row).is_dirty) {
           if (set_ddram) {
             LCD_PREFIX(set_cursor)(row, col);
@@ -254,7 +254,7 @@ void lcd_force_display() {
   lcd_display();
 }
 
-#endif /* LCD_BUFFERED */
+#endif /* AVR_LCD_BUFFERED */
 
 //void* lcd_task(UNUSED_VARIABLE task_data_t data) {
 //  COROUTINE_BEGIN();
@@ -266,7 +266,7 @@ void lcd_force_display() {
 //
 //  lcd_setup();
 //
-//  REGISTER_SOFTWARE_PWM(LCD_PWM_CHANNEL, lcd.bl, LCD_BL_VALUE);
+//  REGISTER_SOFTWARE_PWM(AVR_LCD_PWM_CHANNEL, lcd.bl, AVR_LCD_BL_VALUE);
 //
 //  lcd.rdy = true;
 //  trigger_event(lcd.rdy_ev, EV_NOW);

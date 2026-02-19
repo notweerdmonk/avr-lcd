@@ -37,7 +37,7 @@ const struct avr_mmcu_vcd_trace_t _lcd_trace[]  _MMCU_ = {
 int main()
 {
 
-#ifdef LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
   lcd_set_pins(&(struct hardware_repr) { 
                                          .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
                                          .ctl.rs = 4,
@@ -61,7 +61,7 @@ int main()
                                          //.data.pins.d6 = 21,
                                          //.data.pins.d7 = 22, 
                                        });
-#elif defined LCD_USE_ABSOLUTE_PIN_NUMBERS
+#elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
   lcd_set_pins(&(struct hardware_repr) { 
                                          .ctl.rs = 4, //0,
                                          .ctl.en = 5, //1,
@@ -106,7 +106,7 @@ int main()
 #endif
 
   lcd_reset();
-#ifdef LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
   lcd_setup(
       0,
       //0,
@@ -127,7 +127,7 @@ int main()
   lcd_set_cursor(1, 13);
   lcd_put_string("^_^");
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
   lcd_display();
 #endif
   _delay_ms(1000);
@@ -136,7 +136,7 @@ int main()
   lcd_clear_till(3);
   lcd_put_string(":)");
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
   lcd_display();
 #endif
 

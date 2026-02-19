@@ -20,7 +20,7 @@
 #include <lcd_config.h>
 #include <hd44780_cmds.h>
 
-#ifdef LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
 
 typedef enum lcd_hw_repr {
   /* Mutually exclusive bits */
@@ -33,13 +33,13 @@ typedef enum lcd_hw_repr {
   NONCONTIGUOUS_DATA_PINS   = 0x20
 } lcd_hw_repr_t;
 
-#endif /* LCD_RUNTIME_HW_REPR_SEL */
+#endif /* AVR_LCD_RUNTIME_HW_REPR_SEL */
 
 #define _PREFIX(p, x) p ## _ ## x
 #define PREFIX(...) _PREFIX(__VA_ARGS__)
-#define LCD_PREFIX(x) PREFIX(LCD_TYPE, x)
+#define LCD_PREFIX(x) PREFIX(AVR_LCD_TYPE, x)
 
-#define LCD_HEADER <LCD_TYPE.h>
+#define LCD_HEADER <AVR_LCD_TYPE.h>
 
 #include LCD_HEADER
 
@@ -66,7 +66,7 @@ void lcd_reset() {
 }
 
 inline
-#ifdef LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
 void lcd_setup(
     uint8_t entry_mode,
     uint8_t display,
@@ -92,7 +92,7 @@ void lcd_clear();
 
 void lcd_clear_till(uint8_t n);
 
-#define LCD_CLEAR_LINE() lcd_clear_till(LCD_COLS - lcd_get_cursor().row)
+#define LCD_CLEAR_LINE() lcd_clear_till(AVR_LCD_COLS - lcd_get_cursor().row)
 
 void lcd_put_char(char c);
 
@@ -106,13 +106,13 @@ void lcd_put_int(int n);
 
 void lcd_put_float(float f, uint8_t m);
 
-#ifdef LCD_BUFFERED
+#ifdef AVR_LCD_BUFFERED
 
 void lcd_display();
 
 void lcd_force_display();
 
-#endif /* LCD_BUFFERED */
+#endif /* AVR_LCD_BUFFERED */
 
 //void* lcd_task(task_data_t data);
 
