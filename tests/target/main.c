@@ -1,5 +1,6 @@
 #include <lcd.h>
 #include <avr/sleep.h>
+#include <util/delay.h>
 
 #include "/home/weerdmonk/include/simavr/avr/avr_mcu_section.h"
 
@@ -77,14 +78,17 @@ int main()
                                        });
 #else
   lcd_set_pins(&(struct hardware_repr) { 
+#ifdef AVR_UART_SIMTEST
+                                         .ctl.rs = 4,
+                                         .ctl.en = 5,
+                                         .ctl.rw = 6,
+                                         .ctl.bl = PIN_NC,
+#else
                                          .ctl.rs = 0,
                                          .ctl.en = 1,
                                          .ctl.rw = PIN_NC,
                                          .ctl.bl = 2,
-                                         //.ctl.rs = 4,
-                                         //.ctl.en = 5,
-                                         //.ctl.rw = 6,
-                                         //.ctl.bl = PIN_NC,
+#endif
                                          //.data.pins.d0 = PIN_NC,
                                          //.data.pins.d1 = PIN_NC,
                                          //.data.pins.d2 = PIN_NC,
@@ -93,8 +97,11 @@ int main()
                                          //.data.pins.d5 = 1, //20,
                                          //.data.pins.d6 = 2, //21,
                                          //.data.pins.d7 = 3, //22, 
-                                         //.data.d4 = 0
+#ifdef AVR_UART_SIMTEST
+                                         .data.d4 = 0
+#else
                                          .data.d4 = 4
+#endif
                                        });
 #endif
 
@@ -114,11 +121,24 @@ int main()
   lcd_setup();
 #endif
   lcd_put_string("hello not-devs");
+  //lcd_put_string("hello");
   lcd_set_cursor(1, 0);
   lcd_put_string("^_^");
   lcd_set_cursor(1, 13);
   lcd_put_string("^_^");
+
+#ifdef LCD_BUFFERED
   lcd_display();
+#endif
+  _delay_ms(1000);
+
+  lcd_set_cursor(1, 0);
+  lcd_clear_till(3);
+  lcd_put_string(":)");
+
+#ifdef LCD_BUFFERED
+  lcd_display();
+#endif
 
   cli();
   sleep_cpu();

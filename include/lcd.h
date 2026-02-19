@@ -18,7 +18,7 @@
 #include <utility.h>
 #include <ascii.h>
 #include <lcd_config.h>
-#include <lcd_commands.h>
+#include <hd44780_cmds.h>
 
 #ifdef LCD_RUNTIME_HW_REPR_SEL
 
@@ -35,176 +35,13 @@ typedef enum lcd_hw_repr {
 
 #endif /* LCD_RUNTIME_HW_REPR_SEL */
 
-typedef struct hardware_repr {
+#define _PREFIX(p, x) p ## _ ## x
+#define PREFIX(...) _PREFIX(__VA_ARGS__)
+#define LCD_PREFIX(x) PREFIX(LCD_TYPE, x)
 
-#define LCD_DATA_PIN_SIZE 3
+#define LCD_HEADER <LCD_TYPE.h>
 
-#ifdef LCD_RUNTIME_HW_REPR_SEL
-
-#undef LCD_DATA_PIN_SIZE
-#define LCD_DATA_PIN_SIZE 6
-
-  uint8_t mode;
-
-  union {
-    volatile uint8_t *data_port_addr;
-    uint8_t data_port_num;
-  } data_port;
-
-  union {
-    volatile uint8_t *ctl_port_addr;
-    struct {
-      volatile uint8_t *rs_port_addr;
-      volatile uint8_t *en_port_addr;
-      volatile uint8_t *rw_port_addr;
-      volatile uint8_t *bl_port_addr;
-    } addrs;
-    uint8_t ctl_port_num;
-    struct {
-      uint8_t rs_port_num;
-      uint8_t en_port_num;
-      uint8_t rw_port_num;
-      uint8_t bl_port_num;
-    } nums;
-  } ctl_port;
-
-#else /* !LCD_RUNTIME_HW_REPR_SEL */
-
-
-#ifdef LCD_USE_PORT_ADDR
-
-  volatile uint8_t *data_port_addr;
-
-#ifdef LCD_USE_SEPARATE_PORTS
-
-  volatile uint8_t *rs_port_addr;
-  volatile uint8_t *en_port_addr;
-  volatile uint8_t *rw_port_addr;
-  volatile uint8_t *bl_port_addr;
-
-#else /* !LCD_USE_SEPARATE_PORTS */
-
-  volatile uint8_t *ctl_port_addr;
-
-#endif /* LCD_USE_SEPARATE_PORTS */
-
-#elif defined LCD_USE_RELATIVE_PIN_NUMBERS
-
-  /*
-   * PORTA 0
-   * PORTB 1
-   * PORTC 2
-   * PORTD 3
-   * PORTE 4
-   * PORTF 5
-   */
-
-  uint8_t data_port_num : 3;
-
-#ifdef LCD_USE_SEPARATE_PORTS
-
-  uint8_t rs_port_num : 3;
-  uint8_t en_port_num : 3;
-  uint8_t rw_port_num : 3;
-  uint8_t bl_port_num : 3;
-
-#else /* !LCD_USE_SEPARATE_PORTS */
-
-  uint8_t ctl_port_num : 3;
-
-#endif /* LCD_USE_SEPARATE_PORTS */
-
-
-#elif defined LCD_USE_ABSOLUTE_PIN_NUMBERS
-
-#undef LCD_DATA_PIN_SIZE
-#define LCD_DATA_PIN_SIZE 6
-
-#else /* 
-       * !LCD_USE_PORT_ADDR &&
-       * !LCD_USE_RELATIVE_PIN_NUMBERS &&
-       * !LCD_USE_ABSOLUTE_PIN_NUMBERS
-       */
-
-  /* Data and control ports are defined as macros */
-
-#endif /* LCD_USE_PORT_ADDR */
-
-
-#endif /* LCD_RUNTIME_HW_REPR_SEL */
-
-#ifdef LCD_RUNTIME_HW_REPR_SEL
-
-  //uint8_t bus_bitmask[8];
-  union {
-    struct __attribute__((packed)) {
-      uint8_t d0 : LCD_DATA_PIN_SIZE;
-      uint8_t d1 : LCD_DATA_PIN_SIZE;
-      uint8_t d2 : LCD_DATA_PIN_SIZE;
-      uint8_t d3 : LCD_DATA_PIN_SIZE;
-      uint8_t d4 : LCD_DATA_PIN_SIZE;
-      uint8_t d5 : LCD_DATA_PIN_SIZE;
-      uint8_t d6 : LCD_DATA_PIN_SIZE;
-      uint8_t d7 : LCD_DATA_PIN_SIZE;
-    } pins;
-
-    uint8_t d4;
-
-  } data;
-
-#else
-/*
-#elif defined LCD_USE_PORT_ADDR || defined LCD_USE_RELATIVE_PIN_NUMBERS || \
-  defined LCD_USE_ABSOLUTE_PIN_NUMBERS
-*/
-
-#if defined LCD_USE_NONCONTIGUOUS_DATA_PINS || \
-  defined LCD_USE_ABSOLUTE_PIN_NUMBERS
-
-  union {
-    struct __attribute__((packed)) {
-      uint8_t d0 : LCD_DATA_PIN_SIZE;
-      uint8_t d1 : LCD_DATA_PIN_SIZE;
-      uint8_t d2 : LCD_DATA_PIN_SIZE;
-      uint8_t d3 : LCD_DATA_PIN_SIZE;
-      uint8_t d4 : LCD_DATA_PIN_SIZE;
-      uint8_t d5 : LCD_DATA_PIN_SIZE;
-      uint8_t d6 : LCD_DATA_PIN_SIZE;
-      uint8_t d7 : LCD_DATA_PIN_SIZE;
-    } pins;
-  } data;
-
-#else /*
-       * !LCD_USE_NONCONTIGUOUS_DATA_PINS &&
-       * !LCD_USE_ABSOLUTE_PIN_NUMBERS
-       */
-
-
-#ifdef LCD_4BIT
-
-  union {
-    uint8_t d4;
-  } data;
-
-#endif /* LCD_4BIT */
-
-
-#endif/*
-       * LCD_USE_NONCONTIGUOUS_DATA_PINS ||
-       * LCD_USE_ABSOLUTE_PIN_NUMBERS
-       */
-
-
-#endif /* LCD_RUNTIME_HW_REPR_SEL */
-
-  struct __attribute__((packed)) {
-    uint8_t rs : 3;
-    uint8_t en : 3;
-    uint8_t rw : 3;
-    uint8_t bl : 3;
-  } ctl;
-
-} hardware_repr_t;
+#include LCD_HEADER
 
 typedef struct hardware_repr lcd_data_t;
 
@@ -213,26 +50,39 @@ typedef struct cursor {
   uint8_t col;
 } cursor_t;
 
-void lcd_set_pins(struct hardware_repr *p);
+inline
+void lcd_set_pins(struct hardware_repr *p) {
+  LCD_PREFIX(set_pins)(p);
+}
 
-void lcd_set_brightness(uint8_t value);
+inline
+void lcd_set_brightness(uint8_t value) {
+  LCD_PREFIX(set_brightness)(value);
+}
 
-void lcd_reset();
+inline
+void lcd_reset() {
+  LCD_PREFIX(reset)();
+}
 
+inline
 #ifdef LCD_RUNTIME_HW_REPR_SEL
 void lcd_setup(
     uint8_t entry_mode,
     uint8_t display,
     uint8_t cursor_shift,
     uint8_t function
-  );
+  ) {
+  LCD_PREFIX(setup)(entry_mode, display, cursor_shift, function);
 #else
-void lcd_setup();
+void lcd_setup() {
+  LCD_PREFIX(setup)();
 #endif
-
-bool is_lcd_ready();
+}
 
 //event_id_t get_lcd_ready_event();
+
+bool lcd_ready();
 
 struct cursor lcd_get_cursor();
 
@@ -256,9 +106,13 @@ void lcd_put_int(int n);
 
 void lcd_put_float(float f, uint8_t m);
 
+#ifdef LCD_BUFFERED
+
 void lcd_display();
 
 void lcd_force_display();
+
+#endif /* LCD_BUFFERED */
 
 //void* lcd_task(task_data_t data);
 

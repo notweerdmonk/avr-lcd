@@ -35,6 +35,7 @@ INCLUDE_DIRS += $(realpath .)
 INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
 INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
 
+DEP_SOURCES := $(wildcard *.c)
 SOURCES := lcd.c
 
 OBJECTS = $(SOURCES:.c=.o)
@@ -46,7 +47,7 @@ ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
 
 LIB_DIR := $(PROJECT_ROOT)/lib
 
-LIB_NAME = hd44780
+LIB_NAME = lcd
 LIB = lib$(LIB_NAME).a
 
 include $(PROJECT_ROOT)/Makefile.common
@@ -55,7 +56,7 @@ ARCHIVE := $(AVR_AR) rc
 
 all: $(LIB_DIR)/$(LIB)
 
-$(OBJECTS): $(SOURCES) $(INCLUDE_HEADERS)
+$(OBJECTS): $(DEP_SOURCES) $(INCLUDE_HEADERS)
 
 $(LIB): $(OBJECTS)
 	$(ARCHIVE) $(LIB) $(OBJECTS)
