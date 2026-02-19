@@ -17,12 +17,14 @@
 #error *** F_CPU not defined! ***
 #endif
 
-/****************************************************************************(*/
-/* Project Configuration Flags
- ******************************************************************************/
+/******************************************************************************/
+/* Project Configuration Flags */
+/******************************************************************************/
 
-/* Enable runtime hardware representation selection (call lcd_set_pins with config) */
-/* When enabled, overrides any other hardware representation mode */
+/*
+ * Enable runtime hardware representation selection (call lcd_set_pins with
+ * config). When enabled, overrides any other hardware representation mode.
+ */
 // #define AVR_LCD_RUNTIME_CONFIG
 
 /* Enable use of UART in I/O streams (stdin/stdout/stderr) */

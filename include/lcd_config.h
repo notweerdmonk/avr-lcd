@@ -11,7 +11,8 @@
 #define _AVR_LCD_CONFIG_H_
 
 /******************************************************************************/
-/* LCD Type
+/*
+ * LCD Type
  *
  * Specifies the LCD controller type. Currently only hd44780 is supported.
  */
@@ -19,7 +20,8 @@
 #define AVR_LCD_TYPE hd44780
 
 /******************************************************************************/
-/* LCD Screen Dimensions
+/*
+ * LCD Screen Dimensions
  *
  * - AVR_LCD_ROWS : Number of rows (default: 2)
  * - AVR_LCD_COLS : Number of columns (default: 16)
@@ -34,7 +36,8 @@
 #endif
 
 /******************************************************************************/
-/* LCD Data Bus Width
+/*
+ * LCD Data Bus Width
  *
  * - AVR_LCD_4BIT : Use 4-bit data bus (saves 4 pins)
  *
@@ -44,9 +47,11 @@
 #define AVR_LCD_4BIT
 
 /******************************************************************************/
-/* Buffered Mode
+/*
+ * Buffered Mode
  *
- * - AVR_LCD_BUFFERED : Writes to RAM buffer and updates LCD in separate cycle
+ * - AVR_LCD_BUFFERED : Writes to RAM buffer and updates LCD in separate
+ *                     cycle
  *
  * Benefits:
  *   - Faster character writes (no blocking LCD wait)
@@ -59,7 +64,8 @@
 #define AVR_LCD_BUFFERED
 
 /******************************************************************************/
-/* LCD Hardware Representation Mode
+/*
+ * LCD Hardware Representation Mode
  *
  * Choose ONE mode that matches your wiring:
  *   - AVR_LCD_RUNTIME_HARDWARE_REPR
@@ -81,17 +87,20 @@
  *   Use relative port numbers (PORTA=0, PORTB=1, PORTC=2, etc.)
  *
  * - AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
- *   Use absolute Arduino-style pin numbers (digital pins 0-21 on ATmega328P)
+ *   Use absolute Arduino-style pin numbers (digital pins 0-21 on
+ *   ATmega328P)
  *
  * - AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
- *   Data pins can be non-contiguous (sparse). Useful for spread-out wiring.
+ *   Data pins can be non-contiguous (sparse). Useful for spread-out
+ *   wiring.
  *
  * - AVR_LCD_USE_SEPARATE_PORTS
  *   Control signals (RS, EN, RW, BL) can use separate ports.
- *   Should be combined with AVR_LCD_USE_PORT_ADDR or AVR_LCD_USE_RELATIVE_PIN_NUMBERS.
- *   Has no effect with other options.
+ *   Should be combined with AVR_LCD_USE_PORT_ADDR or
+ *   AVR_LCD_USE_RELATIVE_PIN_NUMBERS. Has no effect with other options.
  */
 /******************************************************************************/
+
 /* To enable runtime configuration, uncomment the following line: */
 // #define AVR_LCD_RUNTIME_HARDWARE_REPR
 
@@ -121,7 +130,8 @@
 #endif
 
 /******************************************************************************/
-/* LCD Hardware Wiring (for macro-based mode)
+/*
+ * LCD Hardware Wiring (for macro-based mode)
  *
  * These are used when not using runtime configuration.
  */
@@ -139,19 +149,22 @@
 #endif
 
 /******************************************************************************/
-/* LCD Display Lines
+/*
+ * LCD Display Lines
  *
  * - AVR_LCD_1LINE : Use 1-line display mode
  * - AVR_LCD_2LINE : Use 2-line display mode (default for 2+ rows)
  *
  * Note: Only needed for special displays.
+ *
  */
 /******************************************************************************/
 /* To enable 1-line mode, uncomment the following line: */
 // #define AVR_LCD_1LINE
 
 /******************************************************************************/
-/* LCD Font Size
+/*
+ * LCD Font Size
  *
  * - AVR_LCD_5x10DOTS : Use 5x10 dot font (only valid for 1-line mode)
  * - AVR_LCD_5x8DOTS  : Use 5x8 dot font (default)
@@ -163,7 +176,8 @@
 // #define AVR_LCD_5x10DOTS
 
 /******************************************************************************/
-/* LCD Display Configuration
+/*
+ * LCD Display Configuration
  *
  * These flags control the initial display state.
  */
@@ -190,7 +204,8 @@
 // #define AVR_LCD_DISPLAY_MOVE_LEFT
 
 /******************************************************************************/
-/* LCD Backlight PWM
+/*
+ * LCD Backlight PWM
  *
  * - AVR_LCD_PWM_CHANNEL : PWM channel for backlight control
  * - AVR_LCD_BL_VALUE    : Backlight brightness (0-255)
@@ -205,11 +220,12 @@
 #endif
 
 /******************************************************************************/
-/* Example Configurations
+/*
+ * Example Configurations
  *
- * =========================================================================
+ * ========================================================================
  * Example 1: Typical 16x2 LCD, 4-bit mode, macros (default)
- * =========================================================================
+ * ========================================================================
  * #define AVR_LCD_ROWS 2
  * #define AVR_LCD_COLS 16
  * #define AVR_LCD_4BIT
@@ -217,9 +233,9 @@
  * #define AVR_LCD_CTL_PORT B
  * #define AVR_LCD_DATA_PORT D
  *
- * =========================================================================
+ * ========================================================================
  * Example 2: 20x4 LCD, 4-bit mode, absolute pin numbers
- * =========================================================================
+ * ========================================================================
  * #define AVR_LCD_ROWS 4
  * #define AVR_LCD_COLS 20
  * #define AVR_LCD_4BIT
@@ -228,26 +244,26 @@
  * #define AVR_LCD_CTL_PORT B
  * #define AVR_LCD_DATA_PORT B
  *
- * =========================================================================
+ * ========================================================================
  * Example 3: Runtime configuration (set pins at runtime)
- * =========================================================================
+ * ========================================================================
  * #define AVR_LCD_ROWS 2
  * #define AVR_LCD_COLS 16
  * #define AVR_LCD_RUNTIME_HARDWARE_REPR
  * // Then call lcd_set_pins() in main() before lcd_reset()
  *
- * =========================================================================
+ * ========================================================================
  * Example 4: Minimal unbuffered, 4-bit, no cursor
- * =========================================================================
+ * ========================================================================
  * #define AVR_LCD_ROWS 2
  * #define AVR_LCD_COLS 16
  * #undef AVR_LCD_BUFFERED  // Disable buffered mode
  * #define AVR_LCD_CTL_PORT B
  * #define AVR_LCD_DATA_PORT D
  *
- * =========================================================================
+ * ========================================================================
  * Example 5: 1-line display with 5x10 font
- * =========================================================================
+ * ========================================================================
  * #define AVR_LCD_ROWS 1
  * #define AVR_LCD_COLS 16
  * #define AVR_LCD_1LINE
@@ -256,6 +272,6 @@
  * #define AVR_LCD_DATA_PORT D
  *
  */
-/*****************************************************************************/
+/******************************************************************************/
 
 #endif /* _AVR_LCD_CONFIG_H_ */
