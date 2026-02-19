@@ -208,7 +208,7 @@
     pin_val;                        \
   })
 
-#if defined AVR_LCD_RUNTIME_HW_REPR_SEL || defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS
+#if defined AVR_LCD_RUNTIME_HARDWARE_REPR || defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS
 static
 volatile uint8_t* port_num_to_addr(uint8_t portnum) {
   volatile uint8_t *addr = NULL;

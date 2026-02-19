@@ -20,7 +20,7 @@
 #include <lcd_config.h>
 #include <hd44780_cmds.h>
 
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
 typedef enum lcd_hw_repr {
   /* Mutually exclusive bits */
@@ -33,7 +33,7 @@ typedef enum lcd_hw_repr {
   NONCONTIGUOUS_DATA_PINS   = 0x20
 } lcd_hw_repr_t;
 
-#endif /* AVR_LCD_RUNTIME_HW_REPR_SEL */
+#endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
 
 #define _PREFIX(p, x) p ## _ ## x
 #define PREFIX(...) _PREFIX(__VA_ARGS__)
@@ -66,7 +66,7 @@ void lcd_reset() {
 }
 
 inline
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 void lcd_setup(
     uint8_t entry_mode,
     uint8_t display,

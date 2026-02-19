@@ -8,7 +8,7 @@ typedef struct hardware_repr {
 
 #define __AVR_LCD_DATA_PIN_SIZE 3
 
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
 #undef __AVR_LCD_DATA_PIN_SIZE
 #define __AVR_LCD_DATA_PIN_SIZE 6
@@ -37,7 +37,7 @@ typedef struct hardware_repr {
     } nums;
   } ctl_port;
 
-#else /* !AVR_LCD_RUNTIME_HW_REPR_SEL */
+#else /* !AVR_LCD_RUNTIME_HARDWARE_REPR */
 
 
 #ifdef AVR_LCD_USE_PORT_ADDR
@@ -100,9 +100,9 @@ typedef struct hardware_repr {
 #endif /* AVR_LCD_USE_PORT_ADDR */
 
 
-#endif /* AVR_LCD_RUNTIME_HW_REPR_SEL */
+#endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
 
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
   //uint8_t bus_bitmask[8];
   union {
@@ -164,7 +164,7 @@ typedef struct hardware_repr {
        */
 
 
-#endif /* AVR_LCD_RUNTIME_HW_REPR_SEL */
+#endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
 
   struct __attribute__((packed)) {
     uint8_t rs : 3;
@@ -181,7 +181,7 @@ void hd44780_set_brightness(uint8_t value);
 
 void hd44780_reset();
 
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 void hd44780_setup(
     uint8_t entry_mode,
     uint8_t display,

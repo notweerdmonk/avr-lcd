@@ -7,8 +7,8 @@
 #define CONFIG_H_
 
 /* Versioning */
-#define MAJOR_VERSION 0
-#define MINOR_VERSION 1
+#define MAJOR_VERSION 1
+#define MINOR_VERSION 0
 #define REVISION      0
 
 /* F_CPU */
@@ -17,11 +17,12 @@
 #error *** F_CPU not defined! ***
 #endif
 
-/*****************************************************************************/
+/****************************************************************************(*/
 /* Project Configuration Flags
- *****************************************************************************/
+ ******************************************************************************/
 
-/* Enable runtime UART configuration (call uart_setup with config struct) */
+/* Enable runtime hardware representation selection (call lcd_set_pins with config) */
+/* When enabled, overrides any other hardware representation mode */
 // #define AVR_LCD_RUNTIME_CONFIG
 
 /* Enable use of UART in I/O streams (stdin/stdout/stderr) */

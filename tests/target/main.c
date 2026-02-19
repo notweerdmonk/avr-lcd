@@ -37,7 +37,7 @@ const struct avr_mmcu_vcd_trace_t _lcd_trace[]  _MMCU_ = {
 int main()
 {
 
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
   lcd_set_pins(&(struct hardware_repr) { 
                                          .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
                                          .ctl.rs = 4,
@@ -78,7 +78,7 @@ int main()
                                        });
 #else
   lcd_set_pins(&(struct hardware_repr) { 
-#ifdef AVR_UART_SIMTEST
+#ifdef AVR_LCD_SIMTEST
                                          .ctl.rs = 4,
                                          .ctl.en = 5,
                                          .ctl.rw = 6,
@@ -97,7 +97,7 @@ int main()
                                          //.data.pins.d5 = 1, //20,
                                          //.data.pins.d6 = 2, //21,
                                          //.data.pins.d7 = 3, //22, 
-#ifdef AVR_UART_SIMTEST
+#ifdef AVR_LCD_SIMTEST
                                          .data.d4 = 0
 #else
                                          .data.d4 = 4
@@ -106,7 +106,7 @@ int main()
 #endif
 
   lcd_reset();
-#ifdef AVR_LCD_RUNTIME_HW_REPR_SEL
+#ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
   lcd_setup(
       0,
       //0,
