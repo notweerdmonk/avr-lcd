@@ -10,6 +10,13 @@
 #ifndef _AVR_LCD_CONFIG_H_
 #define _AVR_LCD_CONFIG_H_
 
+#define _PREFIX(p, x) p ## _ ## x
+#define PREFIX(...) _PREFIX(__VA_ARGS__)
+#define LCD_PREFIX(x) PREFIX(AVR_LCD_TYPE, x)
+
+#define LCD_HEADER <AVR_LCD_TYPE.h>
+#define LCD_SOURCE <AVR_LCD_TYPE.c>
+
 /******************************************************************************/
 /*
  * LCD Type
@@ -92,12 +99,17 @@
  *
  * - AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
  *   Data pins can be non-contiguous (sparse). Useful for spread-out
- *   wiring.
+ *   wiring. This mode can also be used in conjuction with:
+ *     - AVR_LCD_USE_PORT_ADDR
+ *     - AVR_LCD_USE_RELATIVE_PIN_NUMBERS
+ *     - AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
  *
  * - AVR_LCD_USE_SEPARATE_PORTS
  *   Control signals (RS, EN, RW, BL) can use separate ports.
- *   Should be combined with AVR_LCD_USE_PORT_ADDR or
- *   AVR_LCD_USE_RELATIVE_PIN_NUMBERS. Has no effect with other options.
+ *   This mode should be combined with
+ *     - AVR_LCD_USE_PORT_ADDR
+ *     - AVR_LCD_USE_RELATIVE_PIN_NUMBERS
+ *    It has no effect with other options.
  */
 /******************************************************************************/
 
@@ -113,11 +125,11 @@
 /* To use absolute pin numbers, uncomment the following line: */
 // #define AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-/* To use non-contiguous data pins, uncomment the following line: */
-// #define AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
-
 /* To use separate ports for control signals, uncomment the following line: */
 // #define AVR_LCD_USE_SEPARATE_PORTS
+
+/* To use non-contiguous data pins, uncomment the following line: */
+// #define AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
 
 /******************************************************************************/
 /*

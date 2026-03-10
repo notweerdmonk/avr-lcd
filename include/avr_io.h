@@ -24,8 +24,8 @@ typedef enum _pwm_channel_id {
 #define WRITE_DDR(x, y)     (CONCAT(DDR,x) = (y))
 #define WRITE_PORT(x, y)    (CONCAT(PORT,x) = (y))
 
-#define READ_DDR(x)         (CONCAT(DDR,x))
-#define READ_PORT(x)        (CONCAT(PORT,x))
+#define READ_DDR(x)         (CONCAT(DDR,(x)))
+#define READ_PORT(x)        (CONCAT(PORT,(x)))
 
 #define SET_DDR(x, y)       (CONCAT(DDR,x) |= (y))
 #define CLR_DDR(x, y)       (CONCAT(DDR,x) &= ~(y))
@@ -37,12 +37,12 @@ typedef enum _pwm_channel_id {
 #define OUTPUT_PORT(x)      (CONCAT(DDR,x) = 0xFF)
 #define INPUT_PORT(x)       (CONCAT(DDR,x) = 0x00)
 
-#define OUTPUT_PIN(x, y)    (CONCAT(DDR,x) |= (BITMASK(y)))
-#define INPUT_PIN(x, y)     (CONCAT(DDR,x) &=	~(BITMASK(y)))
+#define OUTPUT_PIN(x, y)    (CONCAT(DDR,x) |= (BITMASK((y))))
+#define INPUT_PIN(x, y)     (CONCAT(DDR,x) &=	~(BITMASK((y))))
 
-#define READ_PIN(x, y)       (CONCAT(PIN,x) & (BITMASK(y)))
-#define SET_PIN(x, y)       (CONCAT(PORT,x) |= (BITMASK(y)))
-#define CLR_PIN(x, y)       (CONCAT(PORT,x) &= ~(BITMASK(y)))
+#define READ_PIN(x, y)      (CONCAT(PIN,x) & (BITMASK((y))))
+#define SET_PIN(x, y)       (CONCAT(PORT,x) |= (BITMASK((y))))
+#define CLR_PIN(x, y)       (CONCAT(PORT,x) &= ~(BITMASK((y))))
 
 /* Takes number literals as argument for bit */
 #define OUTPUT_PIN_IMM(x, y) \

@@ -2,7 +2,7 @@
 #ifndef PORT_MEGA328P_H
 #define PORT_MEGA328P_H
 
-#include <io.h>
+#include <avr_io.h>
 
 #ifdef __AVR_ATmega328P__
 
@@ -12,76 +12,83 @@
 
 /*
  * port numbering:
- * 0 : DDRB/PORTB/PINB
- * 1 : DDRC/PORTC/PINC
- * 2 : DDRD/PORTD/PIND
+ * 1 : DDRB/PORTB/PINB
+ * 2 : DDRC/PORTC/PINC
+ * 3 : DDRD/PORTD/PIND
  */
 
 /* TODO: use ternary operator */
 #define SET_DDR_NUMBER(ddr, mask) \
   do {                  \
-    if (ddr == 0)       \
+    if (ddr == 1)       \
       SET_DDR(B, mask); \
-    else if (ddr == 1)  \
-      SET_DDR(C, mask); \
     else if (ddr == 2)  \
+      SET_DDR(C, mask); \
+    else if (ddr == 3)  \
       SET_DDR(D, mask); \
   } while (0)
 
 #define CLR_DDR_NUMBER(ddr, mask) \
   do {                  \
-    if (ddr == 0)       \
+    if (ddr == 1)       \
       CLR_DDR(B, mask); \
-    else if (ddr == 1)  \
-      CLR_DDR(C, mask); \
     else if (ddr == 2)  \
+      CLR_DDR(C, mask); \
+    else if (ddr == 3)  \
       CLR_DDR(D, mask); \
   } while (0)
 
 #define SET_PORT_NUMBER(port, mask) \
   do {                   \
-    if (port == 0)       \
+    if (port == 1)       \
       SET_PORT(B, mask); \
-    else if (port == 1)  \
-      SET_PORT(C, mask); \
     else if (port == 2)  \
+      SET_PORT(C, mask); \
+    else if (port == 3)  \
       SET_PORT(D, mask); \
   } while (0)
 
 #define CLR_PORT_NUMBER(port, mask) \
   do {                   \
-    if (port == 0)       \
+    if (port == 1)       \
       CLR_PORT(B, mask); \
-    else if (port == 1)  \
-      CLR_PORT(C, mask); \
     else if (port == 2)  \
+      CLR_PORT(C, mask); \
+    else if (port == 3)  \
       CLR_PORT(D, mask); \
   } while (0)
 
 /* pin manipulation and PIN register read */
 /*
  * pin numbering:
- * 0..7   : PB0..PB7
- * 8..14  : PC0..PC6
- * 15..22 : PD0..PD7
+ * 8..15   : PB0..PB7
+ * 16..21  : PC0..PC6
+ * 22, 23  : undefined
+ * 24..31  : PD0..PD7
  */
 
 #define CONVERT_PIN_NUMBER(p) \
   ({                             \
     uint8_t pin = p;             \
-    if (8 <= p && p <= 14)       \
+    if (p <= 7)                  \
+      pin = p;                   \
+    else if (p >= 8 && p <= 15)  \
       pin = p - 8;               \
-    else if (15 <= p && p <= 22) \
-      pin = p - 15;              \
+    else if (p >= 16 && p <= 21) \
+      pin = p - 16;              \
+    else if (p >= 24 && p <= 31) \
+      pin = p - 24;              \
     pin;                         \
   })
 
 #define PIN_NUMBER_TO_PORT(p) \
   ({                                 \
     volatile uint8_t *port = &PORTB; \
-    if (8 <= p && p <= 14)           \
+    if (p >= 8 && p <= 15)           \
+      port = &PORTB;                 \
+    else if (16 <= p && p <= 21)     \
       port = &PORTC;                 \
-    else if (15 <= p && p <= 22)     \
+    else if (p >= 24 && p <= 31)     \
       port = &PORTD;                 \
     port;                            \
   })
@@ -89,122 +96,124 @@
 #define PIN_NUMBER_TO_DDR(p) \
   ({                               \
     volatile uint8_t *ddr = &DDRB; \
-    if (8 <= p && p <= 14)         \
+    if (p >= 8 && p <= 15)         \
+      ddr = &DDRB;                 \
+    else if (p >= 16 && p <= 21)   \
       ddr = &DDRC;                 \
-    else if (15 <= p && p <= 22)   \
+    else if (p >= 24 && p <= 31)   \
       ddr = &DDRD;                 \
     port;                          \
   })
 
 #define OUTPUT_PIN_NUMBER(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      OUTPUT_PIN(B, p);          \
-    else if (8 <= p && p <= 14)  \
-      OUTPUT_PIN(C, p - 8);      \
-    else if (15 <= p && p <= 22) \
-      OUTPUT_PIN(D, p - 15);     \
+    if (p >= 8 && p <= 15)       \
+      OUTPUT_PIN(B, p - 8);      \
+    else if (p >= 16 && p <= 21) \
+      OUTPUT_PIN(C, p - 16);     \
+    else if (p >= 24 && p <= 31) \
+      OUTPUT_PIN(D, p - 24);     \
   } while (0)
 
 #define OUTPUT_PIN_NUMBER_IMM(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      OUTPUT_PIN_IMM(B, p);      \
-    else if (8 <= p && p <= 14)  \
-      OUTPUT_PIN_IMM(C, p - 8);  \
-    else if (15 <= p && p <= 22) \
-      OUTPUT_PIN_IMM(D, p - 15); \
+    if (p >= 8 && p <= 15)       \
+      OUTPUT_PIN_IMM(B, p - 8);  \
+    else if (p >= 16 && p <= 21) \
+      OUTPUT_PIN_IMM(C, p - 16); \
+    else if (p >= 24 && p <= 31) \
+      OUTPUT_PIN_IMM(D, p - 24); \
   } while (0)
 
 #define INPUT_PIN_NUMBER(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      INPUT_PIN(B, p);           \
-    else if (8 <= p && p <= 14)  \
-      INPUT_PIN(C, p - 8);       \
-    else if (15 <= p && p <= 22) \
-      INPUT_PIN(D, p - 15);      \
+    if (p >= 8 && p <= 15)       \
+      INPUT_PIN(B, p - 8);       \
+    else if (p >= 16 && p <= 21) \
+      INPUT_PIN(C, p - 16);      \
+    else if (p >= 24 && p <= 31) \
+      INPUT_PIN(D, p - 24);      \
   } while (0)
 
 #define INPUT_PIN_NUMBER_IMM(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      INPUT_PIN_IMM(B, p);       \
-    else if (8 <= p && p <= 14)  \
-      INPUT_PIN_IMM(C, p - 8);   \
-    else if (15 <= p && p <= 22) \
-      INPUT_PIN_IMM(D, p - 15);  \
+    if (p >= 8 && p <= 15)       \
+      INPUT_PIN_IMM(B, p - 8);   \
+    else if (p >= 16 && p <= 21) \
+      INPUT_PIN_IMM(C, p - 16);  \
+    else if (p >= 24 && p <= 31) \
+      INPUT_PIN_IMM(D, p - 24);  \
   } while (0)
 
 #define SET_PIN_NUMBER(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      SET_PIN(B, p);             \
-    else if (8 <= p && p <= 14)  \
-      SET_PIN(C, p - 8);         \
-    else if (15 <= p && p <= 22) \
-      SET_PIN(D, p - 15);        \
+    if (p >= 8 && p <= 15)       \
+      SET_PIN(B, p - 8);         \
+    else if (p >= 16 && p <= 21) \
+      SET_PIN(C, p - 16);        \
+    else if (p >= 24 && p <= 31) \
+      SET_PIN(D, p - 24);        \
   } while (0)
 
 #define SET_PIN_NUMBER_IMM(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      SET_PIN_IMM(B, p);         \
-    else if (8 <= p && p <= 14)  \
-      SET_PIN_IMM(C, p - 8);     \
-    else if (15 <= p && p <= 22) \
-      SET_PIN_IMM(D, p - 15);    \
+    if (p >= 8 && p <= 15)       \
+      SET_PIN_IMM(B, p - 8);     \
+    else if (p >= 16 && p <= 21) \
+      SET_PIN_IMM(C, p - 16);    \
+    else if (p >= 24 && p <= 31) \
+      SET_PIN_IMM(D, p - 24);    \
   } while (0)
 
 #define CLR_PIN_NUMBER(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      CLR_PIN(B, p);             \
-    else if (8 <= p && p <= 14)  \
-      CLR_PIN(C, p - 8);         \
-    else if (15 <= p && p <= 22) \
-      CLR_PIN(D, p - 15);        \
+    if (p >= 8 && p <= 15)       \
+      CLR_PIN(B, p - 8);         \
+    else if (p >= 16 && p <= 21) \
+      CLR_PIN(C, p - 16);        \
+    else if (p >= 24 && p <= 31) \
+      CLR_PIN(D, p - 24);        \
   } while (0)
 
 #define CLR_PIN_NUMBER_IMM(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      CLR_PIN_IMM(B, p);         \
-    else if (8 <= p && p <= 14)  \
-      CLR_PIN_IMM(C, p - 8);     \
-    else if (15 <= p && p <= 22) \
-      CLR_PIN_IMM(D, p - 15);    \
+    if (p >= 8 && p <= 15)       \
+      CLR_PIN_IMM(B, p - 8);     \
+    else if (p >= 16 && p <= 21) \
+      CLR_PIN_IMM(C, p - 16);    \
+    else if (p >= 24 && p <= 31) \
+      CLR_PIN_IMM(D, p - 24);    \
   } while (0)
 
 #define TOGGLE_PIN_NUMBER(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      TOGGLE_PIN(B, p);          \
-    else if (8 <= p && p <= 14)  \
-      TOGGLE_PIN(C, p - 8);      \
-    else if (15 <= p && p <= 22) \
-      TOGGLE_PIN(D, p - 15);     \
+    if (p >= 8 && p <= 15)       \
+      TOGGLE_PIN(B, p - 8);      \
+    else if (p >= 16 && p <= 21) \
+      TOGGLE_PIN(C, p - 16);     \
+    else if (p >= 24 && p <= 31) \
+      TOGGLE_PIN(D, p - 24);     \
   } while (0)
 
 #define TOGGLE_PIN_NUMBER_IMM(p) \
   do {                           \
-    if (0 <= p && p <= 7)        \
-      TOGGLE_PIN_IMM(B, p);      \
-    else if (8 <= p && p <= 14)  \
-      TOGGLE_PIN_IMM(C, p - 8);  \
-    else if (15 <= p && p <= 22) \
-      TOGGLE_PIN_IMM(D, p - 15); \
+    if (p >= 8 && p <= 15)       \
+      TOGGLE_PIN_IMM(B, p - 8);  \
+    else if (p >= 16 && p <= 21) \
+      TOGGLE_PIN_IMM(C, p - 16); \
+    else if (p >= 24 && p <= 31) \
+      TOGGLE_PIN_IMM(D, p - 24); \
   } while (0)
 
 #define GET_PIN_NUMBER(p) \
   ({                                \
     register uint8_t pin_val = 0;   \
-    if (0 <= p && p <= 7)           \
-      pin_val = GET_PIN(B, p);      \
-    else if (8 <= p && p <= 14)     \
-      pin_val = GET_PIN(C, p - 8);  \
-    else if (15 <= p && p <= 22)    \
-      pin_val = GET_PIN(D, p - 15); \
+    if (p >= 8 && p <= 15)          \
+      pin_val = GET_PIN(B, p - 8);  \
+    else if (p >= 16 && p <= 21)    \
+      pin_val = GET_PIN(C, p - 16); \
+    else if (p >= 24 && p <= 31)    \
+      pin_val = GET_PIN(D, p - 24); \
     pin_val;                        \
   })
 
@@ -214,15 +223,15 @@ volatile uint8_t* port_num_to_addr(uint8_t portnum) {
   volatile uint8_t *addr = NULL;
 
  switch (portnum) {
-    case 0: {
+    case 1: {
       addr = &PORTB;
       break;
     }
-    case 1: {
+    case 2: {
       addr = &PORTC;
       break;
     }
-    case 2: {
+    case 3: {
       addr = &PORTD;
       break;
     }
@@ -265,15 +274,15 @@ volatile uint8_t* port_num_to_addr(uint8_t portnum) {
 
 #define SET_OUTPUT_PORT_NIBBLE_FROM_PORT_NUM(num, startbit) \
   switch (num) {                        \
-    case 0: {                           \
+    case 1: {                           \
       SET_DDR(B, (0x0F << startbit));   \
       break;                            \
     }                                   \
-    case 1: {                           \
+    case 2: {                           \
       SET_DDR(C, (0x0F << startbit));   \
       break;                            \
     }                                   \
-    case 2: {                           \
+    case 3: {                           \
       SET_DDR(D, (0x0F << startbit));   \
       break;                            \
     }                                   \
@@ -283,15 +292,15 @@ volatile uint8_t* port_num_to_addr(uint8_t portnum) {
 
 #define SET_OUTPUT_PORT_BYTE_FROM_PORT_NUM(num) \
   switch (num) {        \
-    case 0: {           \
+    case 1: {           \
       OUTPUT_PORT(B);   \
       break;            \
     }                   \
-    case 1: {           \
+    case 2: {           \
       OUTPUT_PORT(C);   \
       break;            \
     }                   \
-    case 2: {           \
+    case 3: {           \
       OUTPUT_PORT(D);   \
       break;            \
     }                   \
@@ -301,15 +310,15 @@ volatile uint8_t* port_num_to_addr(uint8_t portnum) {
 
 #define SET_OUTPUT_PIN_FROM_PORT_NUM(num, pin) \
   switch (num) {            \
-    case 0: {               \
+    case 1: {               \
       OUTPUT_PIN(B, pin);   \
       break;                \
     }                       \
-    case 1: {               \
+    case 2: {               \
       OUTPUT_PIN(C, pin);   \
       break;                \
     }                       \
-    case 2: {               \
+    case 3: {               \
       OUTPUT_PIN(D, pin);   \
       break;                \
     }                       \
@@ -345,16 +354,76 @@ volatile uint8_t* port_num_to_addr(uint8_t portnum) {
 
 #define SET_OUTPUT_PINS_FROM_PORT_NUM(num, ...) \
   switch (num) {                            \
-    case 0: {                               \
+    case 1: {                               \
       SET_PORT_OUTPUT_PINS(B, __VA_ARGS__);  \
       break;                                \
     }                                       \
-    case 1: {                               \
+    case 2: {                               \
       SET_PORT_OUTPUT_PINS(C, __VA_ARGS__);  \
       break;                                \
     }                                       \
-    case 2: {                               \
+    case 3: {                               \
       SET_PORT_OUTPUT_PINS(D, __VA_ARGS__);  \
+      break;                                \
+    }                                       \
+  }
+
+#define SET_PIN_FROM_PORT_NUM(num, pin) \
+  switch (num) {            \
+    case 1: {               \
+      SET_PIN(B, pin);   \
+      break;                \
+    }                       \
+    case 2: {               \
+      SET_PIN(C, pin);   \
+      break;                \
+    }                       \
+    case 3: {               \
+      SET_PIN(D, pin);   \
+      break;                \
+    }                       \
+    default:                \
+      return;               \
+  } 
+
+#define _SET_PORT_PINS_1(port, pin) \
+  do {                        \
+    if (pin != -1) {          \
+      SET_PIN(port, pin);  \
+    }                         \
+  } while (0)
+#define _SET_PORT_PINS_2(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_1(port, __VA_ARGS__)
+#define _SET_PORT_PINS_3(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_2(port, __VA_ARGS__)
+#define _SET_PORT_PINS_4(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_3(port, __VA_ARGS__)
+#define _SET_PORT_PINS_5(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_4(port, __VA_ARGS__)
+#define _SET_PORT_PINS_6(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_5(port, __VA_ARGS__)
+#define _SET_PORT_PINS_7(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_6(port, __VA_ARGS__)
+#define _SET_PORT_PINS_8(port, pin, ...) \
+  SET_PIN(port, pin); _SET_PORT_PINS_7(port, __VA_ARGS__)
+
+#define _SET_PORT_PINS_EXPAND(n, port, ...) \
+  CAT(_SET_PORT_PINS_, n)(port, __VA_ARGS__)
+#define SET_PORT_PINS(port, ...) \
+  _SET_PORT_PINS_EXPAND(_COUNT(__VA_ARGS__), port, __VA_ARGS__)
+
+#define SET_PINS_FROM_PORT_NUM(num, ...) \
+  switch (num) {                            \
+    case 1: {                               \
+      SET_PORT_PINS(B, __VA_ARGS__);  \
+      break;                                \
+    }                                       \
+    case 2: {                               \
+      SET_PORT_PINS(C, __VA_ARGS__);  \
+      break;                                \
+    }                                       \
+    case 3: {                               \
+      SET_PORT_PINS(D, __VA_ARGS__);  \
       break;                                \
     }                                       \
   }

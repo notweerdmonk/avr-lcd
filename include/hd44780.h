@@ -6,12 +6,12 @@
 
 typedef struct hardware_repr {
 
-#define __AVR_LCD_DATA_PIN_SIZE 3
+#define __AVR_LCD_PIN_SIZE 3
 
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
-#undef __AVR_LCD_DATA_PIN_SIZE
-#define __AVR_LCD_DATA_PIN_SIZE 6
+#undef __AVR_LCD_PIN_SIZE
+#define __AVR_LCD_PIN_SIZE 6
 
   uint8_t mode;
 
@@ -86,8 +86,8 @@ typedef struct hardware_repr {
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-#undef __AVR_LCD_DATA_PIN_SIZE
-#define __AVR_LCD_DATA_PIN_SIZE 6
+#undef __AVR_LCD_PIN_SIZE
+#define __AVR_LCD_PIN_SIZE 6
 
 #else /* 
        * !AVR_LCD_USE_PORT_ADDR &&
@@ -96,6 +96,13 @@ typedef struct hardware_repr {
        */
 
   /* Data and control ports are defined as macros */
+#ifndef AVR_LCD_DATA_PORT
+#error AVR_LCD_DATA_PORT not defined
+#endif
+
+#ifndef AVR_LCD_CTL_PORT
+#error AVR_LCD_CTL_PORT not defined
+#endif
 
 #endif /* AVR_LCD_USE_PORT_ADDR */
 
@@ -107,14 +114,14 @@ typedef struct hardware_repr {
   //uint8_t bus_bitmask[8];
   union {
     struct __attribute__((packed)) {
-      uint8_t d0 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d1 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d2 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d3 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d4 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d5 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d6 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d7 : __AVR_LCD_DATA_PIN_SIZE;
+      uint8_t d0 : __AVR_LCD_PIN_SIZE;
+      uint8_t d1 : __AVR_LCD_PIN_SIZE;
+      uint8_t d2 : __AVR_LCD_PIN_SIZE;
+      uint8_t d3 : __AVR_LCD_PIN_SIZE;
+      uint8_t d4 : __AVR_LCD_PIN_SIZE;
+      uint8_t d5 : __AVR_LCD_PIN_SIZE;
+      uint8_t d6 : __AVR_LCD_PIN_SIZE;
+      uint8_t d7 : __AVR_LCD_PIN_SIZE;
     } pins;
 
     uint8_t d4;
@@ -122,6 +129,7 @@ typedef struct hardware_repr {
   } data;
 
 #else
+
 /*
 #elif defined AVR_LCD_USE_PORT_ADDR || defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS || \
   defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
@@ -132,14 +140,14 @@ typedef struct hardware_repr {
 
   union {
     struct __attribute__((packed)) {
-      uint8_t d0 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d1 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d2 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d3 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d4 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d5 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d6 : __AVR_LCD_DATA_PIN_SIZE;
-      uint8_t d7 : __AVR_LCD_DATA_PIN_SIZE;
+      uint8_t d0 : __AVR_LCD_PIN_SIZE;
+      uint8_t d1 : __AVR_LCD_PIN_SIZE;
+      uint8_t d2 : __AVR_LCD_PIN_SIZE;
+      uint8_t d3 : __AVR_LCD_PIN_SIZE;
+      uint8_t d4 : __AVR_LCD_PIN_SIZE;
+      uint8_t d5 : __AVR_LCD_PIN_SIZE;
+      uint8_t d6 : __AVR_LCD_PIN_SIZE;
+      uint8_t d7 : __AVR_LCD_PIN_SIZE;
     } pins;
   } data;
 
@@ -167,10 +175,10 @@ typedef struct hardware_repr {
 #endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
 
   struct __attribute__((packed)) {
-    uint8_t rs : 3;
-    uint8_t en : 3;
-    uint8_t rw : 3;
-    uint8_t bl : 3;
+    uint8_t rs : __AVR_LCD_PIN_SIZE;
+    uint8_t en : __AVR_LCD_PIN_SIZE;
+    uint8_t rw : __AVR_LCD_PIN_SIZE;
+    uint8_t bl : __AVR_LCD_PIN_SIZE;
   } ctl;
 
 } hardware_repr_t;

@@ -36,7 +36,7 @@ INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
 INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
 
 DEP_SOURCES := $(wildcard *.c)
-SOURCES := lcd.c
+SOURCES := avr_lcd.c
 
 OBJECTS = $(SOURCES:.c=.o)
 C_DEPS = $(SOURCES:.c=.d)

@@ -1,13 +1,21 @@
-#include <lcd.h>
-#include <avr/sleep.h>
+#include <avr_lcd.h>
 #include <util/delay.h>
+#include <avr/sleep.h>
 
-#include "/home/weerdmonk/include/simavr/avr/avr_mcu_section.h"
+#if defined AVR_UART_SIMULATION || defined AVR_UART_SIMTEST
 
-AVR_MCU(F_CPU, "atmega328p");
-AVR_MCU_VCD_FILE("lcd_trace.vcd", 1000);
+#define _STRINGIFY(s, ...) #s
+#define STRINGIFY(...) _STRINGIFY(__VA_ARGS__)
+#define MCU_NAME(m) STRINGIFY(m)
+#define VCD_FILE(m) \
+  STRINGIFY(PROJECT_ROOT)STRINGIFY(/simulation/)\
+  STRINGIFY(m)STRINGIFY(_uart_trace.vcd)
 
-const struct avr_mmcu_vcd_trace_t _lcd_trace[]  _MMCU_ = {
+#include <avr_mcu_section.h>
+AVR_MCU(F_CPU, MCU_NAME(DEVICE_NAME));
+AVR_MCU_VCD_FILE(VCD_FILE(DEVICE_NAME), 1000);
+
+const struct avr_mmcu_vcd_trace_t _avr_lcd_trace[]  _MMCU_ = {
   {
     AVR_MCU_VCD_SYMBOL("PORTB"),
     .what = (void*)&PORTB,
@@ -34,110 +42,202 @@ const struct avr_mmcu_vcd_trace_t _lcd_trace[]  _MMCU_ = {
   },
 };
 
-int main()
-{
+#endif /* AVR_UART_SIMULATION || defined AVR_UART_SIMTEST */
+
+int main() {
 
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
-  lcd_set_pins(&(struct hardware_repr) { 
-                                         .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
-                                         .ctl.rs = 4,
-                                         .ctl.en = 5,
-                                         .ctl.rw = 6,
-                                         .ctl.bl = PIN_NC,
-                                         //.ctl.rs = 0,
-                                         //.ctl.en = 1,
-                                         //.ctl.rw = PIN_NC,
-                                         //.ctl.bl = PIN_NC,
-                                         .data.pins.d0 = PIN_NC,
-                                         .data.pins.d1 = PIN_NC,
-                                         .data.pins.d2 = PIN_NC,
-                                         .data.pins.d3 = PIN_NC,
-                                         .data.pins.d4 = 0,
-                                         .data.pins.d5 = 1,
-                                         .data.pins.d6 = 2,
-                                         .data.pins.d7 = 3, 
-                                         //.data.pins.d4 = 19,
-                                         //.data.pins.d5 = 20,
-                                         //.data.pins.d6 = 21,
-                                         //.data.pins.d7 = 22, 
-                                       });
+
+  avr_lcd_set_pins(&(struct hardware_repr) { 
+    .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
+#ifdef AVR_LCD_SIMTEST
+      .ctl.rs = 12,
+      .ctl.en = 13,
+      .ctl.rw = 14,
+      .ctl.bl = PIN_NC,
+#else
+      .ctl.rs = 8,
+      .ctl.en = 9,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 10,
+#endif
+      .data.pins.d0 = PIN_NC,
+      .data.pins.d1 = PIN_NC,
+      .data.pins.d2 = PIN_NC,
+      .data.pins.d3 = PIN_NC,
+#ifdef AVR_LCD_SIMTEST
+      .data.pins.d4 = 8,
+      .data.pins.d5 = 9,
+      .data.pins.d6 = 10,
+      .data.pins.d7 = 11, 
+#else
+      .data.pins.d4 = 28,
+      .data.pins.d5 = 29,
+      .data.pins.d6 = 30,
+      .data.pins.d7 = 31, 
+#endif
+  });
+
+#elif defined AVR_LCD_USE_PORT_ADDR
+
+  avr_lcd_set_pins(&(struct hardware_repr) {
+#ifdef AVR_LCD_SIMTEST
+      .data_port_addr = &PORTB,
+      .ctl_port_addr = &PORTB,
+      .ctl.rs = 4,
+      .ctl.en = 5,
+      .ctl.rw = 6,
+      .ctl.bl = PIN_NC,
+#else
+      .data_port_addr = &PORTD,
+      .ctl_port_addr = &PORTB,
+      .ctl.rs = 0,
+      .ctl.en = 1,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 2,
+#endif
+#ifdef AVR_LCD_SIMTEST
+      .data.d4 = 0,
+#else
+      .data.d4 = 4,
+#endif
+  });
+
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
-  lcd_set_pins(&(struct hardware_repr) { 
-                                         .ctl.rs = 4, //0,
-                                         .ctl.en = 5, //1,
-                                         .ctl.rw = 6, //PIN_NC,
-                                         .ctl.bl = PIN_NC, //2,
-                                         .data.pins.d0 = PIN_NC,
-                                         .data.pins.d1 = PIN_NC,
-                                         .data.pins.d2 = PIN_NC,
-                                         .data.pins.d3 = PIN_NC,
-                                         .data.pins.d4 = 0, //19,
-                                         .data.pins.d5 = 1, //20,
-                                         .data.pins.d6 = 2, //21,
-                                         .data.pins.d7 = 3, //22, 
-                                       });
-#else
-  lcd_set_pins(&(struct hardware_repr) { 
+
+  avr_lcd_set_pins(&(struct hardware_repr) {
 #ifdef AVR_LCD_SIMTEST
-                                         .ctl.rs = 4,
-                                         .ctl.en = 5,
-                                         .ctl.rw = 6,
-                                         .ctl.bl = PIN_NC,
+      .ctl.rs = 12,
+      .ctl.en = 13,
+      .ctl.rw = 14,
+      .ctl.bl = PIN_NC,
 #else
-                                         .ctl.rs = 0,
-                                         .ctl.en = 1,
-                                         .ctl.rw = PIN_NC,
-                                         .ctl.bl = 2,
+      .ctl.rs = 8,
+      .ctl.en = 9,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 10,
 #endif
-                                         //.data.pins.d0 = PIN_NC,
-                                         //.data.pins.d1 = PIN_NC,
-                                         //.data.pins.d2 = PIN_NC,
-                                         //.data.pins.d3 = PIN_NC,
-                                         //.data.pins.d4 = 0, //19,
-                                         //.data.pins.d5 = 1, //20,
-                                         //.data.pins.d6 = 2, //21,
-                                         //.data.pins.d7 = 3, //22, 
+      .data.pins.d0 = PIN_NC,
+      .data.pins.d1 = PIN_NC,
+      .data.pins.d2 = PIN_NC,
+      .data.pins.d3 = PIN_NC,
 #ifdef AVR_LCD_SIMTEST
-                                         .data.d4 = 0
+      .data.pins.d4 = 8,
+      .data.pins.d5 = 9,
+      .data.pins.d6 = 10,
+      .data.pins.d7 = 11, 
 #else
-                                         .data.d4 = 4
+      .data.pins.d4 = 28,
+      .data.pins.d5 = 29,
+      .data.pins.d6 = 30,
+      .data.pins.d7 = 31, 
 #endif
-                                       });
+  });
+
+#elif defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS
+
+  avr_lcd_set_pins(&(struct hardware_repr) { 
+#ifdef AVR_LCD_SIMTEST
+      .data_port_num = 1,
+      .ctl_port_num = 1,
+      .ctl.rs = 4,
+      .ctl.en = 5,
+      .ctl.rw = 6,
+      .ctl.bl = PIN_NC,
+      .data.d4 = 0
+#else
+      .data_port_num = 3,
+      .ctl_port_num = 1,
+      .ctl.rs = 0,
+      .ctl.en = 1,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 2,
+      .data.d4 = 4
+#endif
+  });
+
+#elif defined AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
+
+  avr_lcd_set_pins(&(struct hardware_repr) { 
+#ifdef AVR_LCD_SIMTEST
+      .ctl.rs = 4,
+      .ctl.en = 5,
+      .ctl.rw = 6,
+      .ctl.bl = PIN_NC,
+#else
+      .ctl.rs = 0,
+      .ctl.en = 1,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 2,
+#endif
+#ifdef AVR_LCD_SIMTEST
+      .data.pins.d4 = 0,
+      .data.pins.d5 = 1,
+      .data.pins.d6 = 2,
+      .data.pins.d7 = 3, 
+#else
+      .data.pins.d4 = 4,
+      .data.pins.d5 = 5,
+      .data.pins.d6 = 6,
+      .data.pins.d7 = 7, 
+#endif
+  });
+
+#else
+
+  avr_lcd_set_pins(&(struct hardware_repr) { 
+#ifdef AVR_LCD_SIMTEST
+      .ctl.rs = 4,
+      .ctl.en = 5,
+      .ctl.rw = 6,
+      .ctl.bl = PIN_NC,
+#else
+      .ctl.rs = 0,
+      .ctl.en = 1,
+      .ctl.rw = PIN_NC,
+      .ctl.bl = 2,
+#endif
+#ifdef AVR_LCD_SIMTEST
+      .data.d4 = 0,
+#else
+      .data.d4 = 4,
+#endif
+  });
+
 #endif
 
-  lcd_reset();
+  avr_lcd_reset();
+
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
-  lcd_setup(
+  avr_lcd_setup(
       0,
-      //0,
-      LCD_CMD_DISPLAY_CONTROL |
-      LCD_CMD_DISPLAY_ON |
-      LCD_CMD_CURSOR_ON |
-      LCD_CMD_BLINK_ON,
+      LCD_CMD_DISPLAY_CONTROL
+      | LCD_CMD_DISPLAY_ON | LCD_CMD_CURSOR_ON | LCD_CMD_BLINK_ON,
       0,
       0
-    );
+  );
 #else
-  lcd_setup();
+  avr_lcd_setup();
 #endif
-  lcd_put_string("hello not-devs");
-  //lcd_put_string("hello");
-  lcd_set_cursor(1, 0);
-  lcd_put_string("^_^");
-  lcd_set_cursor(1, 13);
-  lcd_put_string("^_^");
+
+  avr_lcd_put_string("hello not-devs");
+  avr_lcd_set_cursor(1, 0);
+  avr_lcd_put_string("^_^");
+  avr_lcd_set_cursor(1, 13);
+  avr_lcd_put_string("^_^");
 
 #ifdef AVR_LCD_BUFFERED
-  lcd_display();
+  avr_lcd_display();
 #endif
+
   _delay_ms(1000);
 
-  lcd_set_cursor(1, 0);
-  lcd_clear_till(3);
-  lcd_put_string(":)");
+  avr_lcd_set_cursor(1, 0);
+  avr_lcd_clear_till(3);
+  avr_lcd_put_string(":)");
 
 #ifdef AVR_LCD_BUFFERED
-  lcd_display();
+  avr_lcd_display();
 #endif
 
   cli();

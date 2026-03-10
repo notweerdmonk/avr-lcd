@@ -1,5 +1,5 @@
 /*
- * @file lcd.c
+ * @file avr_lcd.c
  * @author notweerdmonk
  * #brief HD44780 LCD module driver
  */
@@ -9,8 +9,6 @@
 
 #include <config.h>
 #include <port.h>
-
-//#include <lcd_data_structure.h>
 
 /*
  * Works using busy wait method
@@ -25,8 +23,11 @@
 #if defined AVR_LCD_RUNTIME_HARDWARE_REPR || \
   ( \
     (defined AVR_LCD_USE_PORT_ADDR || defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS) && \
-    defined AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS \
-  )
+    defined AVR_LCD_USE_SEPARATE_PORTS \
+  ) || \
+  defined AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
+
+#ifndef AVR_LCD_4BIT
 
 static
 void hd44780_set_data_port_lower_nibble(
@@ -61,6 +62,12 @@ void hd44780_set_data_port_lower_nibble(
   }
 }
 
+#else /* !AVR_LCD_4BIT */
+
+#define hd44780_set_data_port_lower_nibble(x)
+
+#endif /* AVR_LCD_4BIT */
+
 static
 void hd44780_set_data_port_upper_nibble(
     volatile uint8_t *port_addr,
@@ -94,10 +101,7 @@ void hd44780_set_data_port_upper_nibble(
   }
 }
 
-#endif /*
-        * AVR_LCD_USE_RELATIVE_PIN_NUMBERS ||
-        * AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
-        */
+#endif
 
 #if defined AVR_LCD_RUNTIME_HARDWARE_REPR || defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
@@ -219,7 +223,7 @@ void hd44780_set_rs() {
 #endif
 
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */ 
+#else /* !AVR_LCD_USE_PORT_ADDR */ 
 
 
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
@@ -232,11 +236,10 @@ void hd44780_set_rs() {
 
 #endif
 
-  *rs_port_addr |= (1 << lcd.hw.ctl.rs);
-
 
 #endif /* AVR_LCD_USE_PORT_ADDR */
 
+  *rs_port_addr |= (1 << lcd.hw.ctl.rs);
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
@@ -318,7 +321,7 @@ void hd44780_clear_rs() {
 #endif
 
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */
+#else /* !AVR_LCD_USE_PORT_ADDR */
 
 
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
@@ -331,11 +334,9 @@ void hd44780_clear_rs() {
 
 #endif
 
-  *rs_port_addr &= ~(1 << lcd.hw.ctl.rs);
-
-
 #endif
 
+  *rs_port_addr &= ~(1 << lcd.hw.ctl.rs);
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
@@ -417,7 +418,7 @@ void hd44780_set_en() {
 #endif
 
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */
+#else /* !AVR_LCD_USE_PORT_ADDR */
 
 
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
@@ -428,13 +429,12 @@ void hd44780_set_en() {
 
   volatile uint8_t *en_port_addr = port_num_to_addr(lcd.hw.ctl_port_num);
 
-#endif
+#endif /* AVR_LCD_USE_SEPARATE_PORTS */
+
+
+#endif /* AVR_LCD_USE_PORT_ADDR */
 
   *en_port_addr |= (1 << lcd.hw.ctl.en);
-
-
-#endif
-
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
@@ -516,7 +516,7 @@ void hd44780_clear_en() {
 #endif
 
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */
+#else /* !AVR_LCD_USE_PORT_ADDR */
 
 
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
@@ -525,15 +525,14 @@ void hd44780_clear_en() {
 
 #else
 
-  volatile uint8_t *en_port_addr = port_num_to_addr(lcd.hw.en_port_num);
+  volatile uint8_t *en_port_addr = port_num_to_addr(lcd.hw.ctl_port_num);
+
+#endif
+
 
 #endif
 
   *en_port_addr &= ~(1 << lcd.hw.ctl.en);
-
-
-#endif
-
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
@@ -618,7 +617,7 @@ void hd44780_write_nibble(uint8_t nibble) {
 
   volatile uint8_t *data_port_addr = lcd.hw.data_port_addr;
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */
+#else /* !AVR_LCD_USE_PORT_ADDR */
   
   volatile uint8_t *data_port_addr = port_num_to_addr(lcd.hw.data_port_num);
 
@@ -631,7 +630,11 @@ void hd44780_write_nibble(uint8_t nibble) {
 
 #else /* !AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
-  *data_port_addr |= ((nibble & 0x0F) << lcd.hw.data.d4);
+  //*data_port_addr |= ((nibble & 0x0F) << lcd.hw.data.d4);
+  uint8_t data_port_byte = *data_port_addr;
+  CLR_MASK(data_port_byte, 0xF << lcd.hw.data.d4);
+  SET_MASK(data_port_byte, (nibble & 0xF) << lcd.hw.data.d4);
+  *data_port_addr = data_port_byte;
 
 #endif /* AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
@@ -646,10 +649,13 @@ void hd44780_write_nibble(uint8_t nibble) {
         * !AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
         */
 
-
 #ifdef AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  hd44780_set_data_port_upper_nibble(&CONCAT(PORT, AVR_LCD_DATA_PORT), &lcd.hw, nibble);
+  hd44780_set_data_port_upper_nibble(
+      &CONCAT(PORT, AVR_LCD_DATA_PORT),
+      &lcd.hw,
+      nibble
+  );
 
 #else /* !AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
@@ -660,12 +666,7 @@ void hd44780_write_nibble(uint8_t nibble) {
 
 #endif /* AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
-
-#endif /*
-        * AVR_LCD_USE_PORT_ADDR ||
-        * AVR_LCD_USE_RELATIVE_PIN_NUMBERS
-        */
-
+#endif
 
 #endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
 
@@ -712,7 +713,7 @@ void hd44780_write_byte(uint8_t byte) {
 
   volatile uint8_t *data_port_addr = lcd.hw.data_port_addr;
 
-#else /* AVR_LCD_USE_RELATIVE_PIN_NUMBERS */
+#else /* !AVR_LCD_USE_PORT_ADDR */
 
   volatile uint8_t *data_port_addr = port_num_to_addr(lcd.hw.data_port_num);
 
@@ -763,7 +764,11 @@ void hd44780_write_byte(uint8_t byte) {
   hd44780_toggle_en();
 }
 
-#endif /* AVR_LCD_RUNTIME_HARDWARE_REPR || !AVR_LCD_4BIT */
+#else /* AVR_LCD_4BIT */
+
+#define hd44780_write_byte(x)
+
+#endif /* !AVR_LCD_4BIT */
 
 
 static
@@ -872,7 +877,7 @@ void hd44780_setup(
     ) {
 
   if (lcd.hw.mode & BUS_4BIT) {
-    lcd_write_nibble(0x02);
+    hd44780_write_nibble(0x02);
   }
 
   /* Set LCD function */
@@ -902,6 +907,10 @@ void hd44780_setup(
       );
   }
 
+  hd44780_cmd(
+      LCD_CMD_CLEAR_DISPLAY
+    );
+
   /* Set entry mode */
   if (entry_mode & LCD_CMD_ENTRY_MODE_SET) {
     hd44780_cmd(entry_mode);
@@ -910,8 +919,12 @@ void hd44780_setup(
     hd44780_cmd(
         LCD_CMD_ENTRY_MODE_SET
         | LCD_CMD_ENTRY_INCR
+        | LCD_CMD_ENTRY_SHIFT_OFF
       );
   }
+
+  /* Use flag 0 from struct lcd to store entry increment/decrement state */
+  lcd.f0 = !(entry_mode & LCD_CMD_ENTRY_DECR);
 
   /* Set cursor characteristics */
   if (cursor_shift & LCD_CMD_CURSOR_SHIFT) {
@@ -929,10 +942,10 @@ void hd44780_setup() {
 
   hd44780_cmd(
       LCD_CMD_FUNCTION_SET
-#ifndef AVR_LCD_4BIT
-      | LCD_CMD_8BIT_MODE
-#else
+#ifdef AVR_LCD_4BIT
       | LCD_CMD_4BIT_MODE
+#else
+      | LCD_CMD_8BIT_MODE
 #endif
 #ifndef AVR_LCD_1LINE
       | LCD_CMD_2LINE
@@ -1105,6 +1118,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
       }
       if (p->ctl.bl != PIN_NC) {
         *(p->ctl_port.addrs.bl_port_addr - 1) |= (1 << p->ctl.bl);
+        *(p->ctl_port.addrs.bl_port_addr) |= (1 << p->ctl.bl);
       }
     } else {
       /* DDR is located one byte leading PORT */
@@ -1115,6 +1129,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
       }
       if (p->ctl.bl != PIN_NC) {
         *(p->ctl_port.ctl_port_addr - 1) |= (1 << p->ctl.bl);
+        *(p->ctl_port.ctl_port_addr) |= (1 << p->ctl.bl);
       }
     }
 
@@ -1156,15 +1171,21 @@ void hd44780_set_pins(struct hardware_repr *p) {
       }
       if (p->ctl.bl != PIN_NC) {
         SET_OUTPUT_PIN_FROM_PORT_NUM(p->ctl_port.nums.bl_port_num, p->ctl.bl);
+        SET_PIN_FROM_PORT_NUM(p->ctl_port.nums.bl_port_num, p->ctl.bl);
       }
     } else {
       SET_OUTPUT_PINS_FROM_PORT_NUM(
           p->ctl_port.ctl_port_num,
           p->ctl.rs,
-          p->ctl.en,
-          p->ctl.rw,
-          p->ctl.bl
+          p->ctl.en
         );
+      if (p->ctl.rw != PIN_NC) {
+        SET_OUTPUT_PIN_FROM_PORT_NUM(p->ctl_port.ctl_port_num, p->ctl.rw);
+      }
+      if (p->ctl.bl != PIN_NC) {
+        SET_OUTPUT_PIN_FROM_PORT_NUM(p->ctl_port.ctl_port_num, p->ctl.bl);
+        SET_PIN_FROM_PORT_NUM(p->ctl_port.ctl_port_num, p->ctl.bl);
+      }
     }
   } else if (lcd.hw.mode & ABSOLUTE_PIN_NUMBERS) {
     if (!(lcd.hw.mode & BUS_4BIT)) {
@@ -1244,6 +1265,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
   }
   if (p->ctl.bl != PIN_NC) {
     *(p->bl_port_addr - 1) |= (1 << p->ctl.bl);
+    *(p->bl_port_addr) |= (1 << p->ctl.bl);
   }
 
 #else /* AVR_LCD_USE_SEPARATE_PORTS */
@@ -1256,6 +1278,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
   }
   if (p->ctl.bl != PIN_NC) {
     *(p->ctl_port_addr - 1) |= (1 << p->ctl.bl);
+    *(p->ctl_port_addr) |= (1 << p->ctl.bl);
   }
 
 #endif /* AVR_LCD_USE_SEPARATE_PORTS */
@@ -1300,6 +1323,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
 
 #endif /* AVR_LCD_4BIT */
 
+
 #endif /* AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
@@ -1311,6 +1335,7 @@ void hd44780_set_pins(struct hardware_repr *p) {
   }
   if (p->ctl.bl != PIN_NC) {
     SET_OUTPUT_PIN_FROM_PORT_NUM(p->bl_port_num, p->ctl.bl);
+    SET_PIN_FROM_PORT_NUM(p->bl_port_num, p->ctl.bl);
   }
 
 #else /* !AVR_LCD_USE_SEPARATE_PORTS */
@@ -1318,10 +1343,15 @@ void hd44780_set_pins(struct hardware_repr *p) {
   SET_OUTPUT_PINS_FROM_PORT_NUM(
       p->ctl_port_num, 
       p->ctl.rs,
-      p->ctl.en,
-      p->ctl.rw,
-      p->ctl.bl
+      p->ctl.en
     );
+  if (p->ctl.rw != PIN_NC) {
+    SET_OUTPUT_PIN_FROM_PORT_NUM(p->ctl_port_num, p->ctl.rw);
+  }
+  if (p->ctl.bl != PIN_NC) {
+    SET_OUTPUT_PIN_FROM_PORT_NUM(p->ctl_port_num, p->ctl.bl);
+    SET_PIN_FROM_PORT_NUM(p->ctl_port_num, p->ctl.bl);
+  }
 
 #endif /* AVR_LCD_USE_SEPARATE_PORTS */
 
@@ -1361,6 +1391,33 @@ void hd44780_set_pins(struct hardware_repr *p) {
 
   /* Data and control ports are defined as macros */
 
+#ifdef AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
+
+
+#ifndef AVR_LCD_4BIT
+
+  SET_PORT_OUTPUT_PINS(
+      AVR_LCD_DATA_PORT,
+      p->data.pins.d0,
+      p->data.pins.d1,
+      p->data.pins.d2,
+      p->data.pins.d3,
+  );
+
+#endif /* AVR_LCD_4BIT */
+
+  SET_PORT_OUTPUT_PINS(
+      AVR_LCD_DATA_PORT,
+      p->data.pins.d4,
+      p->data.pins.d5,
+      p->data.pins.d6,
+      p->data.pins.d7
+  );
+
+
+#else
+
+
 #ifdef AVR_LCD_4BIT
 
   SET_DDR(AVR_LCD_DATA_PORT, (0xF << p->data.d4));
@@ -1371,6 +1428,10 @@ void hd44780_set_pins(struct hardware_repr *p) {
 
 #endif /* AVR_LCD_4BIT */
 
+
+#endif
+
+
 #ifdef AVR_LCD_USE_SEPARATE_PORTS
 
   OUTPUT_PIN(AVR_LCD_RS_PORT, p->ctl.rs);
@@ -1380,9 +1441,9 @@ void hd44780_set_pins(struct hardware_repr *p) {
   }
   if (p->ctl.bl != PIN_NC) {
     OUTPUT_PIN(AVR_LCD_BL_PORT, p->ctl.bl);
-  }
     /* Temporary */
     SET_PIN(AVR_LCD_BL_PORT, p->ctl.bl);
+  }
 
 #else
 
@@ -1399,19 +1460,11 @@ void hd44780_set_pins(struct hardware_repr *p) {
 
 #endif
 
+
 #endif
 
 
 #endif /* AVR_LCD_RUNTIME_HARDWARE_REPR */
-
-}
-
-/**
- * Calling hd44780_set_brightness before registering hd44780_task will result in
- * overriding of the brightness value to AVR_LCD_BL_VALUE.
- */
-void hd44780_set_brightness(uint8_t value) {
-  //set_software_pwm_value(AVR_LCD_PWM_CHANNEL, value);
 }
 
 void hd44780_set_cursor(uint8_t row, uint8_t col) {
