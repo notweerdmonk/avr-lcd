@@ -31,7 +31,7 @@
 #include <util/delay.h>
 #include <avr/sleep.h>
 
-#if defined AVR_UART_SIMULATION || defined AVR_UART_SIMTEST
+#if defined AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST
 
 #define _STRINGIFY(s, ...) #s
 #define STRINGIFY(...) _STRINGIFY(__VA_ARGS__)
@@ -71,7 +71,7 @@ const struct avr_mmcu_vcd_trace_t _avr_lcd_trace[]  _MMCU_ = {
   },
 };
 
-#endif /* AVR_UART_SIMULATION || defined AVR_UART_SIMTEST */
+#endif /* AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST */
 
 int main() {
 

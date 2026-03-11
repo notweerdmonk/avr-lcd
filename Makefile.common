@@ -89,7 +89,7 @@ endif
 
 # Denotes that source code will be compiled for off-target testing
 ifneq ($(strip $(SIMTEST)),)
-override CFLAGS += -DAVR_LCD_SIMTEST
+override CFLAGS += -DAVR_LCD_SIMTEST -DDEVICE_NAME=$(DEVICE)
 endif
 
 # Demo mode with serial communication program
