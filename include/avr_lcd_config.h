@@ -1,3 +1,26 @@
+/*
+ * avr-lcd - LCD library for AVR microcontrollers.
+ * Copyright (C) 2026 notweerdmonk
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * SOFTWARE.
+*/
+
 /**
  * @file avr_lcd_config.h
  * @brief Configuration for AVR LCD library
@@ -38,6 +61,7 @@
  */
 
 /**
+ * @def AVR_LCD_TYPE
  * @brief LCD controller type
  * Currently only hd44780 is supported
  */
@@ -54,12 +78,18 @@
  * @{
  */
 
-/** @brief Number of display rows */
+/**
+ * @def AVR_LCD_ROWS
+ * @brief Number of display rows
+ */
 #ifndef AVR_LCD_ROWS
 #define AVR_LCD_ROWS 2
 #endif
 
-/** @brief Number of display columns */
+/**
+ * @def AVR_LCD_COLS
+ * @brief Number of display columns
+ */
 #ifndef AVR_LCD_COLS
 #define AVR_LCD_COLS 16
 #endif
@@ -306,15 +336,24 @@
  * @brief Start with display off
  */
 
+/* To start with display off, uncomment: */
+// #define AVR_LCD_DISPLAY_OFF
+
 /**
  * @def AVR_LCD_CURSOR_ON
  * @brief Enable cursor display
  */
 
+/* To enable cursor, uncomment: */
+// #define AVR_LCD_CURSOR_ON
+
 /**
  * @def AVR_LCD_BLINK_ON
  * @brief Enable cursor blinking
  */
+
+/* To enable blink, uncomment: */
+// #define AVR_LCD_BLINK_ON
 
 /**
  * @def AVR_LCD_ENTRY_DECR
@@ -323,38 +362,29 @@
  * Default is increment (left to right).
  */
 
+/* To decrement cursor position, uncomment: */
+// #define AVR_LCD_ENTRY_DECR
+
 /**
  * @def AVR_LCD_ENTRY_SHIFT
  * @brief Shift display with cursor
  */
+
+/* To shift display with cursor, uncomment: */
+// #define AVR_LCD_ENTRY_SHIFT
 
 /**
  * @def AVR_LCD_CURSOR_MOVE_LEFT
  * @brief Make cursor move left on character write
  */
 
+/* To make cursor move left, uncomment: */
+// #define AVR_LCD_CURSOR_MOVE_LEFT
+
 /**
  * @def AVR_LCD_DISPLAY_MOVE_LEFT
  * @brief Make display shift left on character write
  */
-
-/* To start with display off, uncomment: */
-// #define AVR_LCD_DISPLAY_OFF
-
-/* To enable cursor, uncomment: */
-// #define AVR_LCD_CURSOR_ON
-
-/* To enable blink, uncomment: */
-// #define AVR_LCD_BLINK_ON
-
-/* To decrement cursor position, uncomment: */
-// #define AVR_LCD_ENTRY_DECR
-
-/* To shift display with cursor, uncomment: */
-// #define AVR_LCD_ENTRY_SHIFT
-
-/* To make cursor move left, uncomment: */
-// #define AVR_LCD_CURSOR_MOVE_LEFT
 
 /* To make display shift left, uncomment: */
 // #define AVR_LCD_DISPLAY_MOVE_LEFT
