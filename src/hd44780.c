@@ -33,16 +33,16 @@
 #include <config.h>
 #include <port.h>
 
+/*****************************************************************************/
+
 /*
  * Works using busy wait method
  * 
  * TODO: add busy poll method
- * TODO: supports HD44780 controller only, add a way to determine controller
  */
 
 /*****************************************************************************/
 
-/*****************************************************************************/
 #if defined AVR_LCD_RUNTIME_HARDWARE_REPR || \
   ( \
     (defined AVR_LCD_USE_PORT_ADDR || defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS) && \
@@ -653,7 +653,6 @@ void hd44780_write_nibble(uint8_t nibble) {
 
 #else /* !AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS */
 
-  //*data_port_addr |= ((nibble & 0x0F) << lcd.hw.data.d4);
   uint8_t data_port_byte = *data_port_addr;
   CLR_MASK(data_port_byte, 0xF << lcd.hw.data.d4);
   SET_MASK(data_port_byte, (nibble & 0xF) << lcd.hw.data.d4);
@@ -867,8 +866,6 @@ void hd44780_reset() {
 
     hd44780_write_nibble(0x03);
     _delay_ms(1);
-
-    //hd44780_write_nibble(0x02);
   }
 
 #else /* AVR_LCD_RUNTIME_HARDWARE_REPR */
@@ -883,8 +880,6 @@ void hd44780_reset() {
 
   hd44780_write_nibble(0x03);
   _delay_ms(1);
-
-  //hd44780_write_nibble(0x02);
 #endif /* AVR_LCD_4BIT */
 
 #endif
@@ -1033,27 +1028,6 @@ void hd44780_setup() {
   lcd.f0 = 1;
 #endif
 
-//#ifdef LCD_DISPLAY_CONTROL
-//  hd44780_cmd(
-//      LCD_CMD_DISPLAY_CONTROL
-//#ifdef AVR_LCD_DISPLAY_OFF
-//      | LCD_CMD_DISPLAY_OFF
-//#else
-//      | LCD_CMD_DISPLAY_ON
-//#endif
-//#ifdef AVR_LCD_CURSOR_ON
-//      | LCD_CMD_CURSOR_ON
-//#else
-//      | LCD_CMD_CURSOR_OFF
-//#endif
-//#ifdef AVR_LCD_BLINK_ON
-//      | LCD_CMD_BLINK_ON
-//#else
-//      | LCD_CMD_BLINK_OFF
-//#endif
-//    );
-//#endif /* LCD_DISPLAY_CONTROL */
-
 #ifdef AVR_LCD_CURSOR_MOVE_LEFT
   hd44780_cmd(
       LCD_CMD_CURSOR_SHIFT | LCD_CMD_CURSOR_MOVE
@@ -1097,8 +1071,6 @@ void hd44780_set_ddram(uint8_t row, uint8_t col) {
     }
   }
 }
-
-/*****************************************************************************/
 
 void hd44780_set_pins(struct hardware_repr *p) {
   if (!p) return;

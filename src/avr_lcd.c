@@ -33,16 +33,6 @@
 #include <avr_lcd.h>
 #include <port.h>
 
-/*****************************************************************************/
-
-/*
- * Works using busy wait method
- * 
- * TODO: add busy poll method
- */
-
-/*****************************************************************************/
-
 typedef struct char_buffer {
   char c;
   bool is_dirty;
