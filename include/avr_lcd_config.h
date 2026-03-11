@@ -41,8 +41,8 @@
  * - Backlight: PWM configuration
  */
 
-#ifndef _AVR_LCD_CONFIG_H_
-#define _AVR_LCD_CONFIG_H_
+#ifndef _AVR_LCD_LCD_CONFIG_H_
+#define _AVR_LCD_LCD_CONFIG_H_
 
 #define _PREFIX(p, x) p ## _ ## x
 #define PREFIX(...) _PREFIX(__VA_ARGS__)
@@ -450,4 +450,4 @@
 
 /*@}*/
 
-#endif /* _AVR_LCD_CONFIG_H_ */
+#endif /* _AVR_LCD_LCD_CONFIG_H_ */
