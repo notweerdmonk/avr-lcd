@@ -30,8 +30,8 @@
  * the HD44780-compatible LCD display.
  */
 
-#ifndef _LCD_COMMANDS_H_
-#define _LCD_COMMANDS_H_
+#ifndef _AVR_LCD_HD44780_COMMANDS_H_
+#define _AVR_LCD_HD44780_COMMANDS_H_
 
 /**
  * @name LCD Commands
@@ -271,4 +271,4 @@
 
 /*@}*/
 
-#endif /* _LCD_COMMANDS_H_ */
+#endif /* _AVR_LCD_HD44780_COMMANDS_H_ */

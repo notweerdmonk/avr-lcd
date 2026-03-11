@@ -27,8 +27,8 @@
  * @brief avr-lcd configuration header
  */
 
-#ifndef CONFIG_H_
-#define CONFIG_H_
+#ifndef _AVR_LCD_CONFIG_H_
+#define _AVR_LCD_CONFIG_H_
 
 /* Versioning */
 #define MAJOR_VERSION 1
@@ -130,4 +130,4 @@
 
 /*@}*/
 
-#endif /* CONFIG_H_ */
+#endif /* _AVR_LCD_CONFIG_H_ */

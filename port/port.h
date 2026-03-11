@@ -22,8 +22,8 @@
 */
 
 
-#ifndef PORT_H
-#define PORT_H
+#ifndef _AVR_LCD_PORT_H
+#define _AVR_LCD_PORT_H
 
 #if defined (__AVR_ATmega32__)
 
@@ -37,4 +37,4 @@
 
 #endif
 
-#endif /* PORT_H */
+#endif /* _AVR_LCD_PORT_H */

@@ -33,8 +33,8 @@
  * @note This header is automatically included by port.h when compiling for ATmega328P
  */
 
-#ifndef PORT_MEGA328P_H
-#define PORT_MEGA328P_H
+#ifndef _AVR_LCD_PORT_MEGA328P_H
+#define _AVR_LCD_PORT_MEGA328P_H
 
 #include <avr_io.h>
 
@@ -2403,4 +2403,4 @@ enum _port_adc_reference {
 
 #endif /* __AVR_ATmega328P__ */
 
-#endif /* PORT_MEGA328P_H */
+#endif /* _AVR_LCD_PORT_MEGA328P_H */
