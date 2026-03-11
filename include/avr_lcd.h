@@ -1,6 +1,6 @@
 /**
  * @file avr_lcd.h
- * @brief Main public API header for avr-hd44780 LCD library
+ * @brief Main public API header for avr-lcd LCD library
  * @author notweerdmonk
  * 
  * A lightweight, configurable C library for driving HD44780-compatible
