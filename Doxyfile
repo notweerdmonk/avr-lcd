@@ -2265,6 +2265,17 @@ PREDEFINED             = __AVR__ \
                          __AVR_ATmega328P__ \
                          F_CPU=16000000 \
                          __attribute__(x)= \
+                         AVR_LCD_RUNTIME_CONFIG \
+                         AVR_LCD_UART_IOSTREAM \
+                         AVR_LCD_UART_MATCH \
+                         AVR_LCD_STRNCMP_MATCH \
+                         AVR_LCD_EMIT_TRIGGER \
+                         AVR_LCD_SIMULATION \
+                         AVR_LCD_SIMTEST \
+                         AVR_LCD_DEMO \
+                         AVR_LCD_DEBUG \
+                         AVR_LCD_SAVE_TEMPS \
+                         AVR_LCD_OPTIM=-O2 \
                          AVR_LCD_4BIT \
                          AVR_LCD_BUFFERED \
                          AVR_LCD_RUNTIME_HARDWARE_REPR \
