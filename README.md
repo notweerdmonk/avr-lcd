@@ -792,6 +792,7 @@ avr-lcd/
 |   |   `-- port_mega328p.h     # ATmega328P specific definitions
 |   `-- port.h                  # Port abstraction
 |-- README.md
+|-- simulation/                 # VCD files from simulations
 |-- src/
 |   |-- avr_lcd.c               # LCD module implementation
 |   |-- hd44780.c               # HD44780 driver implementation
