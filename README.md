@@ -26,16 +26,16 @@ A modular, lightweight LCD library for AVR microcontrollers.
 #include <avr_lcd.h>
 
 int main(void) {
-    lcd_set_pins(NULL);    // Use macro-defined pins
-    lcd_reset();
-    lcd_setup();
+    avr_lcd_set_pins(NULL);                             // Use macro-defined pins
+    avr_lcd_reset();
+    avr_lcd_setup();
     
-    lcd_put_string("Hello, World!");
-    lcd_set_cursor(1, 0);
-    lcd_put_string("AVR LCD v0.1");
+    avr_lcd_put_string("Hello, World!");
+    avr_lcd_set_cursor(1, 0);
+    avr_lcd_put_string("AVR LCD v0.1");
     
 #ifdef AVR_LCD_BUFFERED
-    lcd_display();
+    avr_lcd_display();
 #endif
     
     while(1);
@@ -81,9 +81,9 @@ Then in your code:
 struct hardware_repr hw = {
     // pin configuration
 };
-lcd_set_pins(&hw);
-lcd_reset();
-lcd_setup();
+avr_lcd_set_pins(&hw);
+avr_lcd_reset();
+avr_lcd_setup();
 ```
 
 ### Option 2: Compile from Source
@@ -109,7 +109,7 @@ This approach allows you to customize library features at compile time.
 
 | File | Purpose |
 |------|---------|
-| `include/avr_lcd_config.h` | LCD feature flags (bus mode, buffered mode, display dimensions) |
+| `include/avr_avr_lcd_config.h` | LCD feature flags (bus mode, buffered mode, display dimensions) |
 | `config/config.h` | Project compilation flags (simulation, debug, optimization) |
 
 ### Build Flags
@@ -254,7 +254,7 @@ Define flags directly in your source code before including avr_lcd.h:
 
 ## Feature Flags
 
-Feature flags are defined in `include/avr_lcd_config.h`. All feature flags are prefixed with `AVR_` to avoid conflicts with user code.
+Feature flags are defined in `include/avr_avr_lcd_config.h`. All feature flags are prefixed with `AVR_` to avoid conflicts with user code.
 
 ### Display Configuration
 
@@ -278,7 +278,7 @@ If `AVR_LCD_4BIT` is not defined, 8-bit mode is used.
 |------|---------|-------------|
 | `AVR_LCD_BUFFERED` | defined | Enable buffered operation |
 
-When enabled, character writes go to a RAM buffer. Call `lcd_display()` to flush the buffer to the LCD. Benefits:
+When enabled, character writes go to a RAM buffer. Call `avr_lcd_display()` to flush the buffer to the LCD. Benefits:
 - Faster character writes (no blocking LCD wait)
 - Automatic dirty character tracking
 
@@ -288,7 +288,7 @@ Choose ONE mode that matches your wiring:
 
 | Flag | Description |
 |------|-------------|
-| `AVR_LCD_RUNTIME_HW_REPR_SEL` | Runtime pin configuration via `lcd_set_pins()` |
+| `AVR_LCD_RUNTIME_HW_REPR_SEL` | Runtime pin configuration via `avr_lcd_set_pins()` |
 | `AVR_LCD_USE_PORT_ADDR` | Use direct port addresses |
 | `AVR_LCD_USE_RELATIVE_PIN_NUMBERS` | Use port numbers (PORTB=1, PORTC=2, etc.) |
 | `AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS` | Use Arduino-style pin numbers (0-21) |
@@ -310,8 +310,8 @@ Choose ONE mode that matches your wiring:
 When not using runtime configuration, define port assignments:
 
 ```c
-#define AVR_LCD_CTL_PORT B    // Control port
-#define AVR_LCD_DATA_PORT D   // Data port
+#define AVR_LCD_CTL_PORT B                              // Control port
+#define AVR_LCD_DATA_PORT D                             // Data port
 ```
 
 ## Compilation Flags
@@ -335,10 +335,10 @@ Compilation flags are defined in `config/config.h`. These control build behavior
 ### Initialization
 
 ```c
-void lcd_set_pins(struct hardware_repr *p);  // Set pin configuration
-void lcd_reset(void);                         // Reset LCD controller
-void lcd_setup(void);                         // Initialize LCD (no runtime config)
-void lcd_setup(uint8_t entry_mode,            // Initialize LCD (runtime config)
+void avr_avr_lcd_set_pins(struct hardware_repr *p);     // Set pin configuration
+void avr_avr_lcd_reset(void);                           // Reset LCD controller
+void avr_avr_lcd_setup(void);                           // Initialize LCD (no runtime config)
+void avr_avr_lcd_setup(uint8_t entry_mode,              // Initialize LCD (runtime config)
                uint8_t display,
                uint8_t cursor_shift,
                uint8_t function);
@@ -347,28 +347,27 @@ void lcd_setup(uint8_t entry_mode,            // Initialize LCD (runtime config)
 ### Display Control
 
 ```c
-void lcd_clear(void);                         // Clear display
-void lcd_clear_till(uint8_t n);              // Clear n characters from cursor
-void lcd_display(void);                      // Flush buffer to LCD (buffered mode)
-void lcd_force_display(void);                 // Force flush buffer to LCD
+void avr_avr_lcd_clear(void);                           // Clear display
+void avr_avr_lcd_clear_till(uint8_t n);                 // Clear n characters from cursor
+void avr_avr_lcd_display(void);                         // Flush buffer to LCD (buffered mode)
 ```
 
 ### Cursor Control
 
 ```c
-cursor_t lcd_get_cursor(void);               // Get cursor position
-void lcd_set_cursor(uint8_t row, uint8_t col); // Set cursor position
+struct cursor avr_avr_lcd_get_cursor(void);             // Get cursor position
+void avr_avr_lcd_set_cursor(uint8_t row, uint8_t col);  // Set cursor position
 ```
 
 ### Output Functions
 
 ```c
-void lcd_put_char(char c);                   // Write single character
-void lcd_put_string(char *str);              // Write string
-void lcd_put_pgm_string(PGM_P str);          // Write PROGMEM string
-void lcd_put_uint(unsigned int u);            // Write unsigned integer
-void lcd_put_int(int n);                     // Write signed integer
-void lcd_put_float(float f, uint8_t m);      // Write float with m decimal places
+void avr_avr_lcd_put_char(char c);                      // Write single character
+void avr_avr_lcd_put_string(char *str);                 // Write string
+void avr_avr_lcd_put_pgm_string(PGM_P str);             // Write PROGMEM string
+void avr_avr_lcd_put_uint(unsigned int u);              // Write unsigned integer
+void avr_avr_lcd_put_int(int n);                        // Write signed integer
+void avr_avr_lcd_put_float(float f, uint8_t m);         // Write float with m decimal places
 ```
 
 ### Backlight Control
@@ -378,20 +377,20 @@ void lcd_put_float(float f, uint8_t m);      // Write float with m decimal place
  * PWM callback function type for backlight control
  * @param value PWM value (0-255)
  */
-typedef void (*avr_lcd_pwm_set_value_hook)(uint8_t value);
+typedef void (*avr_avr_lcd_pwm_set_value_hook)(uint8_t value);
 
 /**
  * @brief Register PWM callback for backlight control
  * @param hook Function pointer to PWM setter callback
  * @return Previous callback function pointer
  */
-avr_lcd_pwm_set_value_hook avr_lcd_set_pwm_set_value_hook(avr_lcd_pwm_set_value_hook hook);
+avr_avr_lcd_pwm_set_value_hook avr_avr_lcd_set_pwm_set_value_hook(avr_avr_lcd_pwm_set_value_hook hook);
 
 /**
  * @brief Set backlight brightness
  * @param value Brightness value (0-255)
  */
-void lcd_set_brightness(uint8_t value);
+void avr_lcd_set_brightness(uint8_t value);
 ```
 
 **Example Usage:**
@@ -404,16 +403,16 @@ void my_pwm_set_value(uint8_t value) {
 
 // Register the callback before using brightness
 int main(void) {
-    avr_lcd_set_pwm_set_value_hook(my_pwm_set_value);
+    avr_avr_lcd_set_pwm_set_value_hook(my_pwm_set_value);
     
-    lcd_set_pins(NULL);
-    lcd_reset();
-    lcd_setup();
+    avr_avr_lcd_set_pins(NULL);
+    avr_avr_lcd_reset();
+    avr_avr_lcd_setup();
     
     // Set brightness (0-255)
-    lcd_set_brightness(128);  // 50% brightness
+    avr_avr_lcd_set_brightness(128);                    // 50% brightness
     
-    lcd_put_string("Hello!");
+    avr_avr_lcd_put_string("Hello!");
     
     while(1);
     return 0;
@@ -423,13 +422,13 @@ int main(void) {
 ### Utility
 
 ```c
-bool lcd_ready(void);                        // Check if LCD is ready
+bool avr_avr_lcd_ready(void);                           // Check if LCD is ready
 ```
 
 ### Character Constants
 
 ```c
-#define LCD_CLEAR_LINE()    // Clear current line
+#define LCD_CLEAR_LINE()                                // Clear current line
 ```
 
 ## Wiring Diagram
@@ -480,16 +479,16 @@ bool lcd_ready(void);                        // Check if LCD is ready
 #include <avr_lcd.h>
 
 int main(void) {
-    lcd_set_pins(NULL);    // Use macro-defined pins
-    lcd_reset();
-    lcd_setup();
+    avr_lcd_set_pins(NULL);                             // Use macro-defined pins
+    avr_lcd_reset();
+    avr_lcd_setup();
     
-    lcd_put_string("Hello, World!");
-    lcd_set_cursor(1, 0);
-    lcd_put_string("AVR LCD v0.1");
+    avr_lcd_put_string("Hello, World!");
+    avr_lcd_set_cursor(1, 0);
+    avr_lcd_put_string("AVR LCD v0.1");
     
 #ifdef AVR_LCD_BUFFERED
-    lcd_display();
+    avr_lcd_display();
 #endif
     
     while(1);
@@ -503,7 +502,7 @@ int main(void) {
 #include <avr_lcd.h>
 
 int main(void) {
-    lcd_set_pins(&(struct hardware_repr) {
+    avr_lcd_set_pins(&(struct hardware_repr) {
         .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
         .ctl.rs = 8,
         .ctl.en = 9,
@@ -515,18 +514,18 @@ int main(void) {
         .data.pins.d7 = 7,
     });
     
-    lcd_reset();
-    lcd_setup(
+    avr_lcd_reset();
+    avr_lcd_setup(
         0,
         LCD_CMD_DISPLAY_CONTROL | LCD_CMD_DISPLAY_ON | LCD_CMD_CURSOR_ON,
         0,
         0
     );
     
-    lcd_put_string("Runtime config");
+    avr_lcd_put_string("Runtime config");
     
 #ifdef AVR_LCD_BUFFERED
-    lcd_display();
+    avr_lcd_display();
 #endif
     
     while(1);
@@ -540,13 +539,13 @@ int main(void) {
 #include <avr_lcd.h>
 
 void display_temperature(float temp) {
-    lcd_set_cursor(0, 0);
-    lcd_put_string("Temp: ");
-    lcd_put_float(temp, 1);  // 1 decimal place
-    lcd_put_string(" C");
+    avr_lcd_set_cursor(0, 0);
+    avr_lcd_put_string("Temp: ");
+    avr_lcd_put_float(temp, 1);                         // 1 decimal place
+    avr_lcd_put_string(" C");
     
 #ifdef AVR_LCD_BUFFERED
-    lcd_display();
+    avr_lcd_display();
 #endif
 }
 ```
@@ -560,7 +559,7 @@ void display_temperature(float temp) {
 
 // PWM callback for Timer2 (PB7/OC2A)
 void set_backlight_pwm(uint8_t value) {
-    PORT_TIMER2_SET_OCR(A, value);  // Set PWM duty cycle
+    PORT_TIMER2_SET_OCR(A, value);                      // Set PWM duty cycle
 }
 
 int main(void) {
@@ -577,22 +576,22 @@ int main(void) {
     OUTPUT_PIN_NUMBER(15);
     
     // Register backlight callback
-    avr_lcd_set_pwm_set_value_hook(set_backlight_pwm);
+    avr_avr_lcd_set_pwm_set_value_hook(set_backlight_pwm);
     
-    lcd_set_pins(NULL);
-    lcd_reset();
-    lcd_setup();
+    avr_lcd_set_pins(NULL);
+    avr_lcd_reset();
+    avr_lcd_setup();
     
     // Set brightness levels
-    lcd_set_brightness(255);  // Full brightness
+    avr_lcd_set_brightness(255);                        // Full brightness
     
-    lcd_put_string("Max brightness");
+    avr_lcd_put_string("Max brightness");
     _delay_ms(2000);
     
-    lcd_clear();
-    lcd_set_brightness(64);   // ~25% brightness
+    avr_lcd_clear();
+    avr_lcd_set_brightness(64);                         // ~25% brightness
     
-    lcd_put_string("Dimmed");
+    avr_lcd_put_string("Dimmed");
     
     while(1);
     return 0;
@@ -616,9 +615,9 @@ ISR(TIMER2_OVF_vect) {
         counter = 0;
     }
     if (counter < brightness) {
-        SET_PIN_NUMBER(15);   // LED on (PB7 = pin 15)
+        SET_PIN_NUMBER(15);                             // LED on (PB7 = pin 15)
     } else {
-        CLR_PIN_NUMBER(15);  // LED off
+        CLR_PIN_NUMBER(15);                             // LED off
     }
 }
 
@@ -635,16 +634,16 @@ int main(void) {
     OUTPUT_PIN_NUMBER(15);
     
     // Register backlight callback
-    avr_lcd_set_pwm_set_value_hook(set_backlight_pwm);
+    avr_avr_lcd_set_pwm_set_value_hook(set_backlight_pwm);
     
-    lcd_set_pins(NULL);
-    lcd_reset();
-    lcd_setup();
+    avr_lcd_set_pins(NULL);
+    avr_lcd_reset();
+    avr_lcd_setup();
     
     // Set brightness
-    lcd_set_brightness(128);  // 50% brightness
+    avr_lcd_set_brightness(128);                        // 50% brightness
     
-    lcd_put_string("50% brightness");
+    avr_lcd_put_string("50% brightness");
     
     while(1);
     return 0;
@@ -732,7 +731,7 @@ When compiled with `SIM=1`, the target firmware can generate VCD (Value Change D
 Open the generated VCD file in GTKWave:
 
 ```bash
-gtkwave simulation/lcd_trace.vcd &
+gtkwave simulation/avr_lcd_trace.vcd &
 ```
 
 ## Architecture
@@ -767,32 +766,41 @@ gtkwave simulation/lcd_trace.vcd &
 
 ```
 avr-lcd/
+`-- AGENTS.md                   # Development guidelines for AI agents
+|-- bashrc                      # Additional bash configuration for project
 |-- config/
-|   `-- config.h           # Project compilation flags
+|   `-- config.h                # Project compilation flags
 |-- docs/
-|   |-- html/              # Generated HTML documentation
-|   `-- latex/             # Generated LaTeX documentation
+|   |-- html/                   # Generated HTML documentation
+|   `-- latex/                  # Generated LaTeX documentation
+|-- Doxyfile                    # Doxygen configuration
 |-- include/
-|   |-- avr_lcd.h          # Public API header
-|   |-- avr_lcd_config.h   # LCD feature flags
-|   |-- hd44780.h          # HD44780 driver header
-|   |-- hd44780_cmds.h     # HD44780 command definitions
-|   |-- avr_io.h           # I/O utilities
-|   |-- avr_utility.h      # General utilities
-|   `-- avr_ascii.h        # ASCII conversion utilities
+|   `-- avr_ascii.h             # ASCII conversion utilities
+|   |-- avr_io.h                # I/O utilities
+|   |-- avr_avr_lcd_config.h    # LCD feature flags
+|   |-- avr_lcd.h               # Public API header
+|   |-- avr_utility.h           # General utilities
+|   |-- hd44780_cmds.h          # HD44780 command definitions
+|   `-- hd44780.h               # HD44780 driver header
+|-- lib/                        # Built library output (created upon build)
+|-- LICENSE
+|-- mainpage.h
+|-- Makefile
+|-- Makefile.common
 |-- port/
-|   |-- port.h             # Port abstraction
-|   |-- mega328p/          # ATmega328P specific definitions
-|   `-- mega32/            # ATmega32 specific definitions
+|   |-- mega328p/
+|   |   `-- port_mega328p.h     # ATmega328P specific definitions
+|   `-- port.h                  # Port abstraction
+|-- README.md
 |-- src/
-|   |-- avr_lcd.c          # LCD module implementation
-|   `-- hd44780.c          # HD44780 driver implementation
-|-- tests/
-|   `-- target/            # Test target for simulation
-|-- lib/                   # Built library output
-|-- Makefile               # Build system
-|-- Doxyfile               # Doxygen configuration
-`-- AGENTS.md              # Development guidelines for AI agents
+|   |-- avr_lcd.c               # LCD module implementation
+|   |-- hd44780.c               # HD44780 driver implementation
+|   `-- Makefile
+`-- tests/
+    |-- Makefile
+    `-- target/
+        |-- main.c              # Test target for simulation
+        `-- Makefile
 ```
 
 ## Requirements
@@ -813,7 +821,8 @@ Contributions are welcome. Please ensure code follows the existing style:
 - 2-space indentation
 - snake_case for functions and variables
 - UPPERCASE for macros
-- Feature flags prefixed with `AVR_`
+- Feature flags prefixed with `AVR_LCD_`
+- Public API functions prefixed with `avr_lcd_`
 - Use Javadoc-style comments (`/** ... */`) for documentation
 - See `AGENTS.md` for development guidelines
 
