@@ -43,7 +43,9 @@ typedef struct screen_buffer {
 } screen_buffer_t;
 
 typedef struct avr_lcd {
+#ifdef AVR_LCD_BUFFERED
   struct screen_buffer screen;
+#endif
   struct cursor cursor;
 
   avr_lcd_pwm_set_value_hook pwm_value_hook;

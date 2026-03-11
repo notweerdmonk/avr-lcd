@@ -657,7 +657,7 @@ Typical memory usage with default configuration on ATmega328P:
 | Configuration | Program | Data |
 |---------------|---------|------|
 | Buffered, 4-bit | ~1200 bytes | ~96 bytes |
-| Unbuffered, 4-bit | ~982 bytes | ~96 bytes |
+| Unbuffered, 4-bit | ~982 bytes | ~32 bytes |
 
 ## Supported MCUs
 
