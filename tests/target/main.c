@@ -33,8 +33,6 @@
 
 #if defined AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST
 
-#define _STRINGIFY(s, ...) #s
-#define STRINGIFY(...) _STRINGIFY(__VA_ARGS__)
 #define MCU_NAME(m) STRINGIFY(m)
 #define VCD_FILE(m) \
   STRINGIFY(PROJECT_ROOT)STRINGIFY(/simulation/)\
