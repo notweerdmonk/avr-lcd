@@ -57,7 +57,7 @@
  * #include <avr_lcd.h>
  * 
  * int main(void) {
- *     struct hardware_repr hw = {
+ *     avr_lcd_pins_t hw = {
  *         .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
  *         .ctl.rs = 8,
  *         .ctl.en = 9,
@@ -92,7 +92,6 @@
 #include <avr_utility.h>
 #include <avr_ascii.h>
 #include <avr_lcd_config.h>
-#include <hd44780_cmds.h>
 
 /**
  * @brief Hardware representation mode flags for runtime configuration
@@ -115,7 +114,7 @@ typedef enum avr_lcd_hw_repr_mode {
 #include LCD_HEADER
 
 /** @brief Hardware representation structure */
-typedef struct hardware_repr avr_lcd_data_t;
+typedef hardware_repr_t avr_lcd_pins_t;
 
 /**
  * @brief Cursor position structure
@@ -133,10 +132,10 @@ typedef void (*avr_lcd_pwm_set_value_hook)(uint8_t value);
 
 /**
  * @brief Set LCD pin configuration
- * @param p Pointer to hardware_repr structure.
+ * @param p Pointer to avr_lcd_pins_t structure.
  */
 inline
-void avr_lcd_set_pins(struct hardware_repr *p) {
+void avr_lcd_set_pins(avr_lcd_pins_t *p) {
   LCD_PREFIX(set_pins)(p);
 }
 

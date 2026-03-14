@@ -78,7 +78,7 @@ Then in your code:
 #define AVR_LCD_RUNTIME_HW_REPR_SEL
 #include <avr_lcd.h>
 
-struct hardware_repr hw = {
+avr_lcd_pins_t pins = {
     // pin configuration
 };
 avr_lcd_set_pins(&hw);
@@ -335,7 +335,7 @@ Compilation flags are defined in `config/config.h`. These control build behavior
 ### Initialization
 
 ```c
-void avr_avr_lcd_set_pins(struct hardware_repr *p);     // Set pin configuration
+void avr_avr_lcd_set_pins(avr_lcd_pins_t *p);     // Set pin configuration
 void avr_avr_lcd_reset(void);                           // Reset LCD controller
 void avr_avr_lcd_setup(void);                           // Initialize LCD (no runtime config)
 void avr_avr_lcd_setup(uint8_t entry_mode,              // Initialize LCD (runtime config)
@@ -502,7 +502,7 @@ int main(void) {
 #include <avr_lcd.h>
 
 int main(void) {
-    avr_lcd_set_pins(&(struct hardware_repr) {
+    avr_lcd_set_pins(&(avr_lcd_pins_t) {
         .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
         .ctl.rs = 8,
         .ctl.en = 9,

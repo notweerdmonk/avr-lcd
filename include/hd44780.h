@@ -38,6 +38,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <hd44780_cmds.h>
 
 /**
  * @brief Hardware representation structure for LCD connections

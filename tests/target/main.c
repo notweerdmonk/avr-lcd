@@ -75,7 +75,7 @@ int main() {
 
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
-  avr_lcd_set_pins(&(struct hardware_repr) { 
+  avr_lcd_set_pins(&(avr_lcd_pins_t) { 
     .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
 #ifdef AVR_LCD_SIMTEST
       .ctl.rs = 12,
@@ -107,7 +107,7 @@ int main() {
 
 #elif defined AVR_LCD_USE_PORT_ADDR
 
-  avr_lcd_set_pins(&(struct hardware_repr) {
+  avr_lcd_set_pins(&(avr_lcd_pins_t) {
 #ifdef AVR_LCD_SIMTEST
       .data_port_addr = &PORTB,
       .ctl_port_addr = &PORTB,
@@ -132,7 +132,7 @@ int main() {
 
 #elif defined AVR_LCD_USE_ABSOLUTE_PIN_NUMBERS
 
-  avr_lcd_set_pins(&(struct hardware_repr) {
+  avr_lcd_set_pins(&(avr_lcd_pins_t) {
 #ifdef AVR_LCD_SIMTEST
       .ctl.rs = 12,
       .ctl.en = 13,
@@ -163,7 +163,7 @@ int main() {
 
 #elif defined AVR_LCD_USE_RELATIVE_PIN_NUMBERS
 
-  avr_lcd_set_pins(&(struct hardware_repr) { 
+  avr_lcd_set_pins(&(avr_lcd_pins_t) { 
 #ifdef AVR_LCD_SIMTEST
       .data_port_num = 1,
       .ctl_port_num = 1,
@@ -185,7 +185,7 @@ int main() {
 
 #elif defined AVR_LCD_USE_NONCONTIGUOUS_DATA_PINS
 
-  avr_lcd_set_pins(&(struct hardware_repr) { 
+  avr_lcd_set_pins(&(avr_lcd_pins_t) { 
 #ifdef AVR_LCD_SIMTEST
       .ctl.rs = 4,
       .ctl.en = 5,
@@ -212,7 +212,7 @@ int main() {
 
 #else
 
-  avr_lcd_set_pins(&(struct hardware_repr) { 
+  avr_lcd_set_pins(&(avr_lcd_pins_t) { 
 #ifdef AVR_LCD_SIMTEST
       .ctl.rs = 4,
       .ctl.en = 5,
