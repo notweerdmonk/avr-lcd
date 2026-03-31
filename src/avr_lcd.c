@@ -45,6 +45,7 @@ typedef struct screen_buffer {
 typedef struct avr_lcd {
 #ifdef AVR_LCD_BUFFERED
   struct screen_buffer screen;
+  uint8_t row_anchor;
 #endif
   struct cursor cursor;
 
@@ -52,14 +53,14 @@ typedef struct avr_lcd {
 
   struct hardware_repr hw; /* Hardware representation */
 
-  bool clr : 1;
-  bool upt : 1;
-  bool rdy : 1;
-  bool f0  : 1;
-  bool f1  : 1;
-  bool f2  : 1;
+  bool clear : 1;
+  bool update : 1;
+  bool ready : 1;
+  bool vscroll : 1;
   bool f3  : 1;
-  bool f4  : 1;
+  bool f2  : 1;
+  bool f1  : 1;
+  bool f0  : 1;
 
 } avr_lcd_t;
 
@@ -84,31 +85,39 @@ static struct avr_lcd lcd;
 #define CURY cursor.row
 
 void avr_lcd_put_char(char c) {
-  if ((lcd.CURY >= AVR_LCD_ROWS)) {
-    return;
+  if (lcd.CURX >= AVR_LCD_COLS) {
+    lcd.CURX = 0;
+    lcd.CURY = (lcd.CURY + 1) % AVR_LCD_ROWS;
+    if (lcd.row_anchor) {
+      lcd.row_anchor = (lcd.row_anchor + 1) % AVR_LCD_ROWS;
+    }
+
+#ifndef AVR_LCD_BUFFERED
+    LCD_PREFIX(set_cursor)(lcd.CURY, lcd.CURX);
+#endif
+
   }
 
 #ifdef AVR_LCD_BUFFERED
 
-  char_buffer_t *p_pixel = &(lcd.SCREEN(lcd.CURX, lcd.CURY));
-  if ((p_pixel->c != c) || lcd.clr){
+  char_buffer_t *p_pixel =
+    &lcd.SCREEN(
+        lcd.CURX++,
+        lcd.row_anchor ? lcd.row_anchor - 1 : lcd.CURY
+    );
+  if ((p_pixel->c != c) || lcd.clear) {
     p_pixel->c = c;
     p_pixel->is_dirty = true;
   }
 
-  lcd.upt = true;
+  lcd.update = true;
 
 #else
 
- LCD_PREFIX(put_char)(c);
+  LCD_PREFIX(put_char)(c);
 
 #endif
 
-  ++lcd.CURX;
-  if (lcd.CURX >= AVR_LCD_COLS) {
-    lcd.CURY = (lcd.CURY + 1) % 2;
-    lcd.CURX = 0;
-  }
 }
 
 void avr_lcd_put_string(char *str) {
@@ -169,17 +178,50 @@ void avr_lcd_put_float(float f, uint8_t m) {
 }
 
 bool avr_lcd_ready() {
-  return (bool)lcd.rdy;
+  return (bool)lcd.ready;
 }
+
+#ifdef AVR_LCD_BUFFERED
+
+void avr_lcd_set_vscroll(bool vscroll) {
+  lcd.vscroll = vscroll;
+}
+
+#endif /* AVR_LCD_BUFFERED */
 
 cursor_t avr_lcd_get_cursor() {
   return lcd.cursor;
 }
 
 void avr_lcd_set_cursor(uint8_t row, uint8_t col) {
-  if ((row < AVR_LCD_ROWS) && (col < AVR_LCD_COLS)) {
-    lcd.CURY = row;
-    lcd.CURX = col;
+  lcd.CURX = col < AVR_LCD_COLS ? col : AVR_LCD_COLS - 1;
+  lcd.CURY = row < AVR_LCD_ROWS ? row : AVR_LCD_ROWS - 1;
+
+  if (lcd.vscroll && row >= AVR_LCD_ROWS) {
+    row = (row % AVR_LCD_ROWS) + lcd.row_anchor;
+    uint8_t row_anchor = (row + 1) % AVR_LCD_ROWS;
+
+    for (uint8_t r = 0; r < AVR_LCD_ROWS; r++) {
+      for (uint8_t c = 0; c < AVR_LCD_COLS; ++c) {
+        lcd.SCREEN(c, r).is_dirty = true;
+        if (
+            (
+              row_anchor > lcd.row_anchor &&
+              r >= lcd.row_anchor && r < row_anchor
+            ) ||
+            (
+              row_anchor < lcd.row_anchor &&
+              (r >= lcd.row_anchor || r < row_anchor)
+            )
+        ) {
+          lcd.SCREEN(c, r).c = ' ';
+        }
+      }
+    }
+
+    lcd.row_anchor = row_anchor;
+
+    lcd.update = true;
   }
 
 #ifndef AVR_LCD_BUFFERED
@@ -193,10 +235,11 @@ void avr_lcd_force_clear() {
 
 void avr_lcd_clear() {
   lcd.CURX = lcd.CURY = 0;
+  lcd.row_anchor = 0;
 
 #ifdef AVR_LCD_BUFFERED
 
-  lcd.clr = true;
+  lcd.clear = true;
 
   for (uint8_t row = 0; row < AVR_LCD_ROWS; row++) {
     for (uint8_t col = 0; col < AVR_LCD_COLS; col++) {
@@ -216,7 +259,8 @@ void avr_lcd_clear_till(uint8_t n) {
   cursor_t prev_cursor = lcd.cursor;
 
   while (n--) avr_lcd_put_char(' ');
-  avr_lcd_set_cursor(prev_cursor.row, prev_cursor.col);
+  lcd.CURY = prev_cursor.row;
+  lcd.CURX = prev_cursor.col;
 }
 
 #ifdef AVR_LCD_BUFFERED
@@ -224,28 +268,30 @@ void avr_lcd_clear_till(uint8_t n) {
 void avr_lcd_display() {
   bool set_ddram = true;
 
-  if (lcd.clr) {
+  if (lcd.clear) {
     LCD_PREFIX(clear)();
   }
 
-  if (!lcd.upt) {
+  if (!lcd.update) {
     return;
   }
 
-  for (uint8_t row = 0; row < AVR_LCD_ROWS; row++) {
+  for (uint8_t row = 0, lcd_row  = 0; row < AVR_LCD_ROWS; row++) {
+    lcd_row = (lcd.row_anchor + row) % AVR_LCD_ROWS;
+    set_ddram = true;
+
     for (uint8_t col = 0; col < AVR_LCD_COLS; col++) {
       if (lcd.SCREEN(col, row).is_dirty) {
         if (set_ddram) {
-          LCD_PREFIX(set_cursor)(row, col);
+          LCD_PREFIX(set_cursor)(lcd_row, col);
           set_ddram = false;
         }
 
         LCD_PREFIX(put_char)(lcd.SCREEN(col, row).c);
         lcd.SCREEN(col, row).is_dirty = false;
-      }
-      else {
-        if (lcd.clr) {
-          lcd.SCREEN(col, row).c = 0;
+      } else {
+        if (lcd.clear) {
+          lcd.SCREEN(col, row).c = ' ';
         }
 
         set_ddram = true;
@@ -253,7 +299,7 @@ void avr_lcd_display() {
     }
   }
 
-  lcd.clr = lcd.upt = false;
+  lcd.clear = lcd.update = false;
 }
 
 #endif /* AVR_LCD_BUFFERED */

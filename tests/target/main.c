@@ -247,6 +247,8 @@ int main() {
   avr_lcd_setup();
 #endif
 
+  avr_lcd_clear();
+
   avr_lcd_put_string("hello not-devs");
   avr_lcd_set_cursor(1, 0);
   avr_lcd_put_string("^_^");
@@ -265,6 +267,33 @@ int main() {
 
 #ifdef AVR_LCD_BUFFERED
   avr_lcd_display();
+#endif
+
+  /* Vertical scroll */
+#ifdef AVR_LCD_BUFFERED
+
+  _delay_ms(1000);
+
+  avr_lcd_set_vscroll(1);
+  avr_lcd_newline();
+  avr_lcd_put_string("newline");
+
+  avr_lcd_display();
+
+  _delay_ms(1000);
+
+  avr_lcd_newline();
+  avr_lcd_put_string("again newline");
+
+  avr_lcd_display();
+
+  _delay_ms(1000);
+
+  avr_lcd_newline();
+  avr_lcd_put_string("another newline");
+
+  avr_lcd_display();
+
 #endif
 
   cli();

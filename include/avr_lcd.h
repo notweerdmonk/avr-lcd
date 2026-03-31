@@ -135,6 +135,7 @@ typedef void (*avr_lcd_pwm_set_value_hook)(uint8_t value);
  * @param p Pointer to avr_lcd_pins_t structure.
  */
 inline
+__attribute__((always_inline))
 void avr_lcd_set_pins(avr_lcd_pins_t *p) {
   LCD_PREFIX(set_pins)(p);
 }
@@ -143,6 +144,7 @@ void avr_lcd_set_pins(avr_lcd_pins_t *p) {
  * @brief Reset the LCD controller
  */
 inline
+__attribute__((always_inline))
 void avr_lcd_reset() {
   LCD_PREFIX(reset)();
 }
@@ -151,6 +153,7 @@ void avr_lcd_reset() {
  * @brief Setup LCD with runtime configuration
  */
 inline
+__attribute__((always_inline))
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 void avr_lcd_setup(
     uint8_t entry_mode,
@@ -204,6 +207,16 @@ void avr_lcd_clear_till(uint8_t n);
 #define AVR_LCD_CLEAR_LINE() avr_lcd_clear_till(AVR_LCD_COLS - avr_lcd_get_cursor().row)
 
 /**
+ * @brief Move cursor to next line
+ */
+inline
+__attribute__((always_inline))
+void avr_lcd_newline() {
+  struct cursor cur = avr_lcd_get_cursor();
+  avr_lcd_set_cursor(cur.row + 1, 0);
+}
+
+/**
  * @brief Write a single character to LCD
  * @param c Character to write
  */
@@ -241,6 +254,14 @@ void avr_lcd_put_int(int n);
 void avr_lcd_put_float(float f, uint8_t m);
 
 #ifdef AVR_LCD_BUFFERED
+
+/**
+ * @brief Enable/disable horizontal scroll
+ * @param vscroll Bool to enable/disable function
+ *
+ * Works only with buffered mode
+ */
+void avr_lcd_set_vscroll(bool vscroll);
 
 /**
  * @brief Flush buffer to LCD display
