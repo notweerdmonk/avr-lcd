@@ -30,6 +30,7 @@
 #include <avr_lcd.h>
 #include <util/delay.h>
 #include <avr/sleep.h>
+#include <port.h>
 
 #if defined AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST
 
@@ -71,7 +72,22 @@ const struct avr_mmcu_vcd_trace_t _avr_lcd_trace[]  _MMCU_ = {
 
 #endif /* AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST */
 
+#ifdef AVR_LCD_BUFFERED
+
+ISR(TIMER2_OVF_vect) {
+  avr_lcd_display();
+}
+
+#endif
+
 int main() {
+
+#ifdef AVR_LCD_BUFFERED
+
+    PORT_TIMER2_SET_CS(32);
+    PORT_TIMER2_ENABLE_OVERFLOW_INTERRUPT();
+
+#endif
 
 #ifdef AVR_LCD_RUNTIME_HARDWARE_REPR
 
@@ -249,25 +265,19 @@ int main() {
 
   avr_lcd_clear();
 
+  sei();
+
   avr_lcd_put_string("hello not-devs");
   avr_lcd_set_cursor(1, 0);
   avr_lcd_put_string("^_^");
   avr_lcd_set_cursor(1, 13);
   avr_lcd_put_string("^_^");
 
-#ifdef AVR_LCD_BUFFERED
-  avr_lcd_display();
-#endif
-
   _delay_ms(1000);
 
   avr_lcd_set_cursor(1, 0);
   avr_lcd_clear_till(3);
   avr_lcd_put_string(":)");
-
-#ifdef AVR_LCD_BUFFERED
-  avr_lcd_display();
-#endif
 
   /* Vertical scroll */
 #ifdef AVR_LCD_BUFFERED
@@ -278,21 +288,22 @@ int main() {
   avr_lcd_newline();
   avr_lcd_put_string("newline");
 
-  avr_lcd_display();
-
   _delay_ms(1000);
 
   avr_lcd_newline();
   avr_lcd_put_string("again newline");
-
-  avr_lcd_display();
 
   _delay_ms(1000);
 
   avr_lcd_newline();
   avr_lcd_put_string("another newline");
 
-  avr_lcd_display();
+  _delay_ms(1000);
+
+  avr_lcd_newline();
+  avr_lcd_put_string("some text");
+
+  _delay_ms(1000);
 
 #endif
 
