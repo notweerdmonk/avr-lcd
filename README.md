@@ -824,6 +824,7 @@ Contributions are welcome. Please ensure code follows the existing style:
 - UPPERCASE for macros
 - Feature flags prefixed with `AVR_LCD_`
 - Public API functions prefixed with `avr_lcd_`
+- Add test cases for every new feature
 - Use Javadoc-style comments (`/** ... */`) for documentation
 - See `AGENTS.md` for development guidelines
 
