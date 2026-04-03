@@ -295,4 +295,18 @@ void hd44780_set_cursor(uint8_t row, uint8_t col);
  */
 void hd44780_put_char(char c);
 
+/**
+ * @brief Write to HD44780 DDRAM
+ * @param addr HD44780 DDRAM address to write to
+ * @param byte Byte to be written
+ */
+void hd44780_ddram_put_byte(uint8_t addr, unsigned char byte);
+
+/**
+ * @brief Read from HD44780 DDRAM
+ * @param addr HD44780 DDRM address to read from
+ * @return Byte at HD44780 DDRAM address
+ */
+unsigned char hd44780_ddram_get_byte(uint8_t addr);
+
 #endif /* _AVR_LCD_HD44780_H_ */

@@ -30,7 +30,9 @@ AVR_OBJDUMP = avr-objdump
 AVR_SIZE = avr-size
 
 DEVICE = atmega328p
-CLOCK = 16000000
+ifeq ($(CLOCK),)
+export CLOCK = 16000000
+endif
 
 ifeq ($(DEVICE),atmega2560)
 PROGRAMMER = wiring
@@ -166,6 +168,20 @@ CFLAGS = $(CFLAGS:-O%=-Os)
 CFLAGS = $(CFLAGS:-save-temps:)
 COMPILE = $(AVR)GCC) -mmcu=$(DEVICE) -fshort-enums $(ERROR_REPORTING) $(CFLAGS) -DF_CPU=$(CLOCK) $(INCLUDE)
 endif
+
+DEP_LIBS_LIB_DIRS := $(foreach d, $(DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/lib)
+define DEP_LIBS_DIRS
+$(LIB_DIR)/$(1)
+endef
+#export DEP_LIBS_DIRS := $(value DEP_LIBS_DIRS)
+
+define BUILD_DEP_LIBS =
+$(MAKE) -C $(call DEP_LIBS_DIRS,$@)
+endef
+#export BUILD_DEP_LIBS := $(value BUILD_DEP_LIBS)
+
+$(DEP_LIBS_MODULES):
+		$(BUILD_DEP_LIBS)
 
 %.o: %.S
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@

@@ -39,8 +39,6 @@ TARGET_NAME = main
 TARGET = $(TARGET_NAME).elf
 TARGET_HEX = $(TARGET_NAME).hex
 
-include $(PROJECT_ROOT)/Makefile.common
-
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 C_DEPS = $(SOURCES:.c=.d)
@@ -54,9 +52,14 @@ LIB_DIR := $(PROJECT_ROOT)/lib
 LIB_NAME = lcd
 LIB = lib$(LIB_NAME).a
 
-LDFLAGS += -L$(LIB_DIR)
+DEP_LIBS_NAMES := lcd
+DEP_LIBS := $(foreach d, $(DEP_LIBS_NAMES), lib$(d).a)
 
-LDLIBS = -l$(LIB_NAME)
+LDFLAGS += -L$(LIB_DIR) $(foreach l, $(DEP_LIBS_LIB_DIRS), -L$(l))
+
+LDLIBS = -l$(LIB_NAME) $(foreach l, $(DEP_LIBS_NAMES), -l$(l))
+
+include $(PROJECT_ROOT)/Makefile.common
 
 all: $(TARGET_HEX) size
 
@@ -65,7 +68,7 @@ $(OBJECTS): $(SOURCES) $(INCLUDE_HEADERS)
 $(LIB_DIR)/$(LIB):
 	$(MAKE) -C $(PROJECT_ROOT)/src
 
-$(TARGET): $(OBJECTS) $(LIB_DIR)/$(LIB)
+$(TARGET): $(OBJECTS) $(LIB_DIR)/$(LIB) | $(DEP_LIBS_MODULES)
 	$(COMPILE) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
 
 # TODO: add EEPROM section

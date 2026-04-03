@@ -30,14 +30,14 @@
 #include <avr_lcd.h>
 #include <util/delay.h>
 #include <avr/sleep.h>
-#include <port.h>
+#include <avr_portable.h>
 
 #if defined AVR_LCD_SIMULATION || defined AVR_LCD_SIMTEST
 
-#define MCU_NAME(m) STRINGIFY(m)
+#define MCU_NAME(m) AVR_UTIL_STRINGIFY(m)
 #define VCD_FILE(m) \
-  STRINGIFY(PROJECT_ROOT)STRINGIFY(/simulation/)\
-  STRINGIFY(m)STRINGIFY(_uart_trace.vcd)
+  AVR_UTIL_STRINGIFY(PROJECT_ROOT)AVR_UTIL_STRINGIFY(/simulation/)\
+  AVR_UTIL_STRINGIFY(m)AVR_UTIL_STRINGIFY(_uart_trace.vcd)
 
 #include <avr_mcu_section.h>
 AVR_MCU(F_CPU, MCU_NAME(DEVICE_NAME));
@@ -97,17 +97,17 @@ int main() {
       .ctl.rs = 12,
       .ctl.en = 13,
       .ctl.rw = 14,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
 #else
       .ctl.rs = 8,
       .ctl.en = 9,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 10,
 #endif
-      .data.pins.d0 = PIN_NC,
-      .data.pins.d1 = PIN_NC,
-      .data.pins.d2 = PIN_NC,
-      .data.pins.d3 = PIN_NC,
+      .data.pins.d0 = AVR_UTIL_PIN_NC,
+      .data.pins.d1 = AVR_UTIL_PIN_NC,
+      .data.pins.d2 = AVR_UTIL_PIN_NC,
+      .data.pins.d3 = AVR_UTIL_PIN_NC,
 #ifdef AVR_LCD_SIMTEST
       .data.pins.d4 = 8,
       .data.pins.d5 = 9,
@@ -130,13 +130,13 @@ int main() {
       .ctl.rs = 4,
       .ctl.en = 5,
       .ctl.rw = 6,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
 #else
       .data_port_addr = &PORTD,
       .ctl_port_addr = &PORTB,
       .ctl.rs = 0,
       .ctl.en = 1,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 2,
 #endif
 #ifdef AVR_LCD_SIMTEST
@@ -153,17 +153,17 @@ int main() {
       .ctl.rs = 12,
       .ctl.en = 13,
       .ctl.rw = 14,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
 #else
       .ctl.rs = 8,
       .ctl.en = 9,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 10,
 #endif
-      .data.pins.d0 = PIN_NC,
-      .data.pins.d1 = PIN_NC,
-      .data.pins.d2 = PIN_NC,
-      .data.pins.d3 = PIN_NC,
+      .data.pins.d0 = AVR_UTIL_PIN_NC,
+      .data.pins.d1 = AVR_UTIL_PIN_NC,
+      .data.pins.d2 = AVR_UTIL_PIN_NC,
+      .data.pins.d3 = AVR_UTIL_PIN_NC,
 #ifdef AVR_LCD_SIMTEST
       .data.pins.d4 = 8,
       .data.pins.d5 = 9,
@@ -186,14 +186,14 @@ int main() {
       .ctl.rs = 4,
       .ctl.en = 5,
       .ctl.rw = 6,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
       .data.d4 = 0
 #else
       .data_port_num = 3,
       .ctl_port_num = 1,
       .ctl.rs = 0,
       .ctl.en = 1,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 2,
       .data.d4 = 4
 #endif
@@ -206,11 +206,11 @@ int main() {
       .ctl.rs = 4,
       .ctl.en = 5,
       .ctl.rw = 6,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
 #else
       .ctl.rs = 0,
       .ctl.en = 1,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 2,
 #endif
 #ifdef AVR_LCD_SIMTEST
@@ -233,11 +233,11 @@ int main() {
       .ctl.rs = 4,
       .ctl.en = 5,
       .ctl.rw = 6,
-      .ctl.bl = PIN_NC,
+      .ctl.bl = AVR_UTIL_PIN_NC,
 #else
       .ctl.rs = 0,
       .ctl.en = 1,
-      .ctl.rw = PIN_NC,
+      .ctl.rw = AVR_UTIL_PIN_NC,
       .ctl.bl = 2,
 #endif
 #ifdef AVR_LCD_SIMTEST
@@ -263,6 +263,7 @@ int main() {
   avr_lcd_setup();
 #endif
 
+  avr_lcd_set_vscroll(1);
   avr_lcd_clear();
 
   sei();
@@ -284,7 +285,6 @@ int main() {
 
   _delay_ms(1000);
 
-  avr_lcd_set_vscroll(1);
   avr_lcd_newline();
   avr_lcd_put_string("newline");
 

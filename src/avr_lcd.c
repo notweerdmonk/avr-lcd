@@ -31,7 +31,7 @@
 #include <util/delay.h>
 
 #include <avr_lcd.h>
-#include <port.h>
+#include <avr_portable.h>
 
 typedef struct char_buffer {
   char c;
@@ -148,7 +148,7 @@ void avr_lcd_put_uint(unsigned int u) {
   }
 
   while (idx) {
-    avr_lcd_put_char(ascii(digits[--idx]));
+    avr_lcd_put_char(avr_util_ascii(digits[--idx]));
   }
 }
 
