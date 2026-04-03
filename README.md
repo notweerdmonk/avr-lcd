@@ -19,6 +19,24 @@ A modular, lightweight LCD library for AVR microcontrollers.
 - simavr (for simulation testing)
 - avrdude (for flashing to hardware)
 - Doxygen (for documentation generation)
+- Git (for cloning with submodules)
+
+### Git Submodules
+
+This project uses two git submodules for common AVR utilities:
+
+```bash
+# Clone with submodules
+git clone --recurse-submodule <repository-url>
+
+# Or initialize submodules after cloning
+git submodule update --init --recursive
+```
+
+| Submodule | Description |
+|-----------|-------------|
+| `lib/avr-utils` | Common AVR utilities (avr_io.h, avr_utility.h, avr_ascii.h) |
+| `lib/avr-portable` | MCU-specific register definitions and abstractions |
 
 ## Quick Start
 
@@ -437,37 +455,37 @@ bool avr_avr_lcd_ready(void);                           // Check if LCD is ready
 ### Typical 16x2 LCD in 4-bit Mode
 
 ```
-                    ATmega328P
-                   +-----------+
-                   |        PB0|<-- D4
-                   |        PB1|<-- D5
-                   |        PB2|<-- D6
-                   |        PB3|<-- D7
-                   |           |
-                   |        PB4|<-- RS (Register Select)
-                   |        PB5|<-- EN (Enable)
-                   |        PB6|<-- RW (Read/Write, optional)
-                   |        PB7|<-- BL (Backlight PWM, optional)
-                   +-----------+
-                        |
-                        v
-              +-------------------+
-              |    HD44780 LCD    |
-              |                   |
-              |  VSS -- GND       |
-              |  VDD -- +5V       |
-              |  V0  -- Contrast  |
-              |  RS  -- PB4       |
-              |  RW  -- GND/PB6   |
-              |  EN  -- PB5       |
-              |  D0-D3 -- NC      |
-              |  D4  -- PB0       |
-              |  D5  -- PB1       |
-              |  D6  -- PB2       |
-              |  D7  -- PB3       |
-              |  A   -- +5V/PB7   |
-              |  K   -- GND       |
-              +-------------------+
+                     ATmega328P
+                    +-----------+
+                    |        PB0|<--- D4
+                    |        PB1|<--- D5
+                    |        PB2|<--- D6
+                    |        PB3|<--- D7
+                    |           |
+                    |        PB4|<--- RS (Register Select)
+                    |        PB5|<--- EN (Enable)
+                    |        PB6|<--- RW (Read/Write, optional)
+                    |        PB7|<--- BL (Backlight PWM, optional)
+                    +-----------+
+                          |
+                          v
+              +----------------------+
+              |      HD44780 LCD     |
+              |                      |
+              |      VSS -- GND      |
+              |      VDD -- +5V      |
+              |       V0 -- Contrast |
+              |       RS -- PB4      |
+              |       RW -- GND/PB6  |
+              |       EN -- PB5      |
+              |    D0-D3 -- NC       |
+              |       D4 -- PB0      |
+              |       D5 -- PB1      |
+              |       D6 -- PB2      |
+              |       D7 -- PB3      |
+              |        A -- +5V/PB7  |
+              |        K -- GND      |
+              +----------------------+
 ```
 
 **Note:** PB7 is shown as optional backlight PWM. Connect to a PWM-capable pin for brightness control. Use the callback registration API to enable software-controlled brightness.
@@ -759,7 +777,7 @@ gtkwave simulation/avr_lcd_trace.vcd &
          |
          v
 +--------+---------+
-|  port/mega328p/  |  <-- MCU-specific port definitions
+| lib/avr-portable |  <-- MCU-specific register definitions (submodule)
 +------------------+
 ```
 
@@ -767,7 +785,7 @@ gtkwave simulation/avr_lcd_trace.vcd &
 
 ```
 avr-lcd/
-`-- AGENTS.md                   # Development guidelines for AI agents
+|-- AGENTS.md                   # Development guidelines for AI agents
 |-- bashrc                      # Additional bash configuration for project
 |-- config/
 |   `-- config.h                # Project compilation flags
@@ -776,22 +794,18 @@ avr-lcd/
 |   `-- latex/                  # Generated LaTeX documentation
 |-- Doxyfile                    # Doxygen configuration
 |-- include/
-|   `-- avr_ascii.h             # ASCII conversion utilities
-|   |-- avr_io.h                # I/O utilities
-|   |-- avr_avr_lcd_config.h    # LCD feature flags
+|   |-- avr_lcd_config.h        # LCD feature flags
 |   |-- avr_lcd.h               # Public API header
-|   |-- avr_utility.h           # General utilities
 |   |-- hd44780_cmds.h          # HD44780 command definitions
 |   `-- hd44780.h               # HD44780 driver header
-|-- lib/                        # Built library output (created upon build)
+|-- lib/
+|   |-- avr-portable/           # Git submodule: MCU port definitions
+|   |-- avr-utils/              # Git submodule: AVR utilities
+|   `-- liblcd.a                # Built library output
 |-- LICENSE
 |-- mainpage.h
 |-- Makefile
 |-- Makefile.common
-|-- port/
-|   |-- mega328p/
-|   |   `-- port_mega328p.h     # ATmega328P specific definitions
-|   `-- port.h                  # Port abstraction
 |-- README.md
 |-- simulation/                 # VCD files from simulations
 |-- src/
@@ -812,6 +826,7 @@ avr-lcd/
 - simavr (for simulation testing)
 - avrdude (for flashing to hardware)
 - Doxygen (for documentation generation)
+- Git (with submodules)
 
 ## License
 
