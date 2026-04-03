@@ -157,6 +157,7 @@ The project uses simavr for firmware simulation:
 
 ```bash
 make SIM=1              # Compile for simulation
+make SIMTEST=1          # Compile for off-target testing on emulator
 make sim                # Run with simavr
 make sim-gdb            # Run with simavr in GDB mode
 ```
@@ -164,8 +165,8 @@ make sim-gdb            # Run with simavr in GDB mode
 ### Flashing to Hardware
 
 ```bash
-make flash              # Build and flash to AVR
-make fuse               # Set AVR fuses
+make -C tests/target flash              # Build and flash to AVR
+make -C tests/target fuse               # Set AVR fuses
 ```
 
 ### Other Build Targets
