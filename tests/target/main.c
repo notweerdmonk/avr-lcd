@@ -74,7 +74,7 @@ const struct avr_mmcu_vcd_trace_t _avr_lcd_trace[]  _MMCU_ = {
 
 #ifdef AVR_LCD_BUFFERED
 
-ISR(TIMER2_OVF_vect) {
+ISR(PORT_TIMER2_OVF_VECT) {
   avr_lcd_display();
 }
 
