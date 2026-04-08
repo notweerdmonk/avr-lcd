@@ -25,15 +25,11 @@
 
 PROJECT_ROOT := $(realpath ../../)
 
-ifeq ($(INCLUDE_DIRS),)
-INCLUDE_DIRS := $(PROJECT_ROOT)/config $(PROJECT_ROOT)/include $(PROJECT_ROOT)/port
-INCLUDE_DIRS := $(foreach i, $(INCLUDE_DIRS), $(realpath $(i)))
-endif
+LIB_DIR := $(PROJECT_ROOT)/lib
 
 INCLUDE_DIRS += $(realpath .)
 
-INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
-INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
+include $(PROJECT_ROOT)/avr-lcd.mk
 
 TARGET_NAME = main
 TARGET = $(TARGET_NAME).elf
@@ -46,8 +42,6 @@ PREPROCESSOR_OUTPUTS = $(SOURCES:.c=.i)
 ASSEMBLY_OUTPUTS = $(SOURCES:.c=.s)
 STACK_USAGE_REPORTS = $(SOURCES:.c=.su)
 ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
-
-LIB_DIR := $(PROJECT_ROOT)/lib
 
 LIB_NAME = lcd
 LIB = lib$(LIB_NAME).a
@@ -88,5 +82,5 @@ load: all
 	@echo Nothing to do
 
 clean:
-	rm -f $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUT) \
+	rm -f $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUTS) \
 		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS) $(TARGET_HEX) $(TARGET)

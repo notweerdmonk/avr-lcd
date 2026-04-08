@@ -25,18 +25,23 @@
 
 PROJECT_ROOT := $(realpath ../)
 
-ifeq ($(INCLUDE_DIRS),)
-INCLUDE_DIRS := $(PROJECT_ROOT)/config $(PROJECT_ROOT)/include $(PROJECT_ROOT)/port
-INCLUDE_DIRS := $(foreach i, $(INCLUDE_DIRS), $(realpath $(i)))
-endif
+LIB_DIR := $(PROJECT_ROOT)/lib
 
 INCLUDE_DIRS += $(realpath .)
 
-INCLUDE += $(foreach i, $(INCLUDE_DIRS), -I$(realpath $(i)))
-INCLUDE_HEADERS = $(foreach dir, $(abspath $(INCLUDE_DIRS)), $(wildcard $(dir)/*.h))
+BUILD_LIB := 1
+
+include $(PROJECT_ROOT)/avr-lcd.mk
 
 DEP_SOURCES := $(wildcard *.c)
 SOURCES := avr_lcd.c
+
+DEP_OBJECTS = $(DEP_SOURCES:.c=.o)
+DEP_C_DEPS = $(DEP_SOURCES:.c=.d)
+DEP_PREPROCESSOR_OUTPUTS = $(DEP_SOURCES:.c=.i)
+DEP_ASSEMBLY_OUTPUTS = $(DEP_SOURCES:.c=.s)
+DEP_STACK_USAGE_REPORTS = $(DEP_SOURCES:.c=.su)
+DEP_ASSEMBLY_LISTINGS = $(DEP_SOURCES:.c=.lst)
 
 OBJECTS = $(SOURCES:.c=.o)
 C_DEPS = $(SOURCES:.c=.d)
@@ -68,5 +73,5 @@ $(LIB_DIR)/$(LIB): $(LIB) | $(LIB_DIR)
 	cp $(LIB) $(LIB_DIR)
 
 clean:
-	rm -f $(LIB) $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUT) \
+	rm -f $(LIB) $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUTS) \
 		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS)

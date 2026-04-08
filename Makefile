@@ -33,16 +33,6 @@ TESTS_DIR := $(PROJECT_ROOT)/tests
 
 export DEP_LIBS_MODULES := avr-portable avr-utils
 
-# This variable is defined at the top-level (project root level) Makefile to
-# include the required upper directories containing header files.
-# It needs to be defined on the command line to run make from any lower
-# directory.
-INCLUDE_DIRS = \
-config include port \
-$(foreach d, $(DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/include) \
-$(foreach d, $(DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/port)
-export INCLUDE_DIRS := $(foreach i, $(INCLUDE_DIRS), $(realpath $(i)))
-
 all: build-lib build-tests
 
 $(LIB_DIR):
