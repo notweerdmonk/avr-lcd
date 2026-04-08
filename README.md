@@ -525,7 +525,7 @@ int main(void) {
         .mode = ABSOLUTE_PIN_NUMBERS | BUS_4BIT,
         .ctl.rs = 8,
         .ctl.en = 9,
-        .ctl.rw = PIN_NC,
+        .ctl.rw = AVR_UTIL_PIN_NC,
         .ctl.bl = 10,
         .data.pins.d4 = 4,
         .data.pins.d5 = 5,
