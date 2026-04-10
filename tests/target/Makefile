@@ -23,11 +23,15 @@
 
 .DEFAULT_GOAL = all
 
+PROJECT_PREFIX := AVR_LCD
+
 PROJECT_ROOT := $(realpath ../../)
 
 LIB_DIR := $(PROJECT_ROOT)/lib
 
-INCLUDE_DIRS += $(realpath .)
+INCLUDE_DIRS := $(realpath .)
+
+DEP_LIBS_MODULES := avr-portable avr-utils
 
 include $(PROJECT_ROOT)/avr-lcd.mk
 
@@ -35,25 +39,35 @@ TARGET_NAME = main
 TARGET = $(TARGET_NAME).elf
 TARGET_HEX = $(TARGET_NAME).hex
 
-SOURCES = $(wildcard *.c)
+include $(PROJECT_ROOT)/Makefile.common
+
+$(foreach d, $(DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_LIB_DIR_VAR,$(d))))
+$(foreach d, $(DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_ROOT_DIR_VAR,$(d))))
+
+-include $(foreach d, $(DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/$(d).mk)
+
+LIB_NAME = lcd
+LIB = lib$(LIB_NAME).a
+
+LDFLAGS += -L$(LIB_DIR)
+
+LDLIBS := -l$(LIB_NAME) $(LDLIBS)
+
+DEP_SOURCES := $(wildcard *.c)
+DEP_OBJECTS = $(DEP_SOURCES:.c=.o)
+DEP_C_DEPS = $(DEP_SOURCES:.c=.d)
+DEP_PREPROCESSOR_OUTPUTS = $(DEP_SOURCES:.c=.i)
+DEP_ASSEMBLY_OUTPUTS = $(DEP_SOURCES:.c=.s)
+DEP_STACK_USAGE_REPORTS = $(DEP_SOURCES:.c=.su)
+DEP_ASSEMBLY_LISTINGS = $(DEP_SOURCES:.c=.lst)
+
+SOURCES = $(TARGET_NAME).c
 OBJECTS = $(SOURCES:.c=.o)
 C_DEPS = $(SOURCES:.c=.d)
 PREPROCESSOR_OUTPUTS = $(SOURCES:.c=.i)
 ASSEMBLY_OUTPUTS = $(SOURCES:.c=.s)
 STACK_USAGE_REPORTS = $(SOURCES:.c=.su)
 ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
-
-LIB_NAME = lcd
-LIB = lib$(LIB_NAME).a
-
-DEP_LIBS_NAMES := lcd
-DEP_LIBS := $(foreach d, $(DEP_LIBS_NAMES), lib$(d).a)
-
-LDFLAGS += -L$(LIB_DIR) $(foreach l, $(DEP_LIBS_LIB_DIRS), -L$(l))
-
-LDLIBS = -l$(LIB_NAME) $(foreach l, $(DEP_LIBS_NAMES), -l$(l))
-
-include $(PROJECT_ROOT)/Makefile.common
 
 all: $(TARGET_HEX) size
 
@@ -82,5 +96,12 @@ load: all
 	@echo Nothing to do
 
 clean:
-	rm -f $(OBJECTS) $(C_DEPS) $(PREPROCESSOR_OUTPUTS) $(ASSEMBLY_OUTPUTS) \
-		$(STACK_USAGE_REPORTS) $(ASSEMBLY_LISTINGS) $(TARGET_HEX) $(TARGET)
+	rm -f \
+		$(OBJECTS) \
+		$(C_DEPS) \
+		$(PREPROCESSOR_OUTPUTS) \
+		$(ASSEMBLY_OUTPUTS) \
+		$(ASSEMBLY_LISTINGS) \
+		$(STACK_USAGE_REPORTS) \
+		$(TARGET_HEX) \
+		$(TARGET)

@@ -172,19 +172,22 @@ CFLAGS = $(CFLAGS:-save-temps:)
 COMPILE = $(AVR)GCC) -mmcu=$(DEVICE) -fshort-enums $(ERROR_REPORTING) $(CFLAGS) -DF_CPU=$(CLOCK)
 endif
 
-DEP_LIBS_LIB_DIRS := $(foreach d, $(DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/lib)
-define DEP_LIBS_DIRS
-$(LIB_DIR)/$(1)
-endef
-#export DEP_LIBS_DIRS := $(value DEP_LIBS_DIRS)
+ARCHIVE := $(AVR_AR) rc
 
 define BUILD_DEP_LIBS =
-$(MAKE) -C $(call DEP_LIBS_DIRS,$@)
+$(MAKE) -C $(LIB_DIR)/$(@)
 endef
-#export BUILD_DEP_LIBS := $(value BUILD_DEP_LIBS)
+
+define MAKE_DEP_LIB_DIR_VAR
+	export $$(shell echo $(1) | sed 's/[- ]/_/g' | tr 'a-z' 'A-Z')_LIB_DIR := $(LIB_DIR)/$(1)/lib
+endef
+
+define MAKE_DEP_ROOT_DIR_VAR
+	export $$(shell echo $(1) | sed 's/[- ]/_/g' | tr 'a-z' 'A-Z')_ROOT_DIR := $(LIB_DIR)/$(1)
+endef
 
 $(DEP_LIBS_MODULES):
-		$(BUILD_DEP_LIBS)
+	$(BUILD_DEP_LIBS)
 
 %.o: %.S
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@

@@ -23,6 +23,8 @@
 
 .DEFAULT_GOAL = all
 
+PROJECT_PREFIX := AVR_LCD
+
 PROJECT_ROOT := $(CURDIR)
 
 LIB_SRC_DIR = $(CURDIR)/src
@@ -32,6 +34,10 @@ LIB_DIR := $(PROJECT_ROOT)/lib
 TESTS_DIR := $(PROJECT_ROOT)/tests
 
 export DEP_LIBS_MODULES := avr-portable avr-utils
+
+BUILD_LIB := 1
+
+include $(PROJECT_ROOT)/avr-lcd.mk
 
 all: build-lib build-tests
 
