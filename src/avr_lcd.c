@@ -53,14 +53,14 @@ typedef struct avr_lcd {
 
   struct hardware_repr hw; /* Hardware representation */
 
-  bool clear : 1;
-  bool update : 1;
-  bool ready : 1;
-  bool vscroll : 1;
-  bool f3  : 1;
-  bool f2  : 1;
-  bool f1  : 1;
-  bool f0  : 1;
+  volatile bool clear : 1;
+  volatile bool update : 1;
+  volatile bool ready : 1;
+  volatile bool vscroll : 1;
+  volatile bool f3  : 1;
+  volatile bool f2  : 1;
+  volatile bool f1  : 1;
+  volatile bool f0  : 1;
 
 } avr_lcd_t;
 
@@ -87,7 +87,13 @@ static struct avr_lcd lcd;
 void avr_lcd_put_char(char c) {
   if (lcd.CURX >= AVR_LCD_COLS) {
     lcd.CURX = 0;
-    lcd.CURY = (lcd.CURY + 1) % AVR_LCD_ROWS;
+
+    if (lcd.CURY == (AVR_LCD_ROWS - 1)) {
+      lcd.CURY = lcd.vscroll ? AVR_LCD_ROWS - 1 : 0;
+    } else {
+      ++lcd.CURY;
+    }
+
     if (lcd.row_anchor) {
       lcd.row_anchor = (lcd.row_anchor + 1) % AVR_LCD_ROWS;
     }
@@ -198,25 +204,31 @@ void avr_lcd_set_cursor(uint8_t row, uint8_t col) {
   lcd.CURY = row < AVR_LCD_ROWS ? row : AVR_LCD_ROWS - 1;
 
   if (lcd.vscroll && row >= AVR_LCD_ROWS) {
+    lcd.update = false;
+
     row = (row % AVR_LCD_ROWS) + lcd.row_anchor;
     uint8_t row_anchor = (row + 1) % AVR_LCD_ROWS;
 
-    for (uint8_t r = 0; r < AVR_LCD_ROWS; r++) {
+    for (uint8_t r = 0, clear_row = 0; r < AVR_LCD_ROWS; r++) {
+      if (
+          (
+            row_anchor > lcd.row_anchor &&
+            r >= lcd.row_anchor && r < row_anchor
+          ) ||
+          (
+            row_anchor < lcd.row_anchor &&
+            (r >= lcd.row_anchor || r < row_anchor)
+          )
+      ) {
+        clear_row = 1;
+      }
       for (uint8_t c = 0; c < AVR_LCD_COLS; ++c) {
         lcd.SCREEN(c, r).is_dirty = true;
-        if (
-            (
-              row_anchor > lcd.row_anchor &&
-              r >= lcd.row_anchor && r < row_anchor
-            ) ||
-            (
-              row_anchor < lcd.row_anchor &&
-              (r >= lcd.row_anchor || r < row_anchor)
-            )
-        ) {
+        if (clear_row) {
           lcd.SCREEN(c, r).c = ' ';
         }
       }
+      clear_row = 0;
     }
 
     lcd.row_anchor = row_anchor;
@@ -240,12 +252,6 @@ void avr_lcd_clear() {
 #ifdef AVR_LCD_BUFFERED
 
   lcd.clear = true;
-
-  for (uint8_t row = 0; row < AVR_LCD_ROWS; row++) {
-    for (uint8_t col = 0; col < AVR_LCD_COLS; col++) {
-      lcd.SCREEN(col, row).is_dirty = false;
-    }
-  }
 
 #else
 
