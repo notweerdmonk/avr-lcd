@@ -31,8 +31,6 @@ LIB_DIR := $(PROJECT_ROOT)/lib
 
 INCLUDE_DIRS := $(realpath .)
 
-DEP_LIBS_MODULES := avr-portable avr-utils
-
 include $(PROJECT_ROOT)/avr-lcd.mk
 
 TARGET_NAME = main
@@ -48,10 +46,6 @@ $(foreach d, $(DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_ROOT_DIR_VAR,$(d))))
 
 LIB_NAME = lcd
 LIB = lib$(LIB_NAME).a
-
-LDFLAGS += -L$(LIB_DIR)
-
-LDLIBS := -l$(LIB_NAME) $(LDLIBS)
 
 DEP_SOURCES := $(wildcard *.c)
 DEP_OBJECTS = $(DEP_SOURCES:.c=.o)
