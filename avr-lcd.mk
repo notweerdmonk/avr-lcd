@@ -1,4 +1,4 @@
-export AVR_LCD_DEP_LIBS_MODULES := avr-portable avr-utils
+export AVR_LCD_DEP_LIBS_MODULES := $(DEP_LIBS_MODULES) avr-portable avr-utils
 
 ifeq ($(strip $(AVR_LCD_ROOT_DIR)),)
 AVR_LCD_ROOT_DIR := $(PROJECT_ROOT)

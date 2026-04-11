@@ -153,7 +153,7 @@ ifeq ($(PKG_CONFIG),)
 else
     $(info pkg-config found: $(PKG_CONFIG))
 		override CFLAGS += $(shell $(PKG_CONFIG) --cflags simavr-avr)
-		INCLUDE += $(shell $(PKG_CONFIG) --cflags-only-I simavr-avr)
+		$$(PROJECT_PREFIX)_INCLUDE += $(shell $(PKG_CONFIG) --cflags-only-I simavr-avr)
 		LDFLAGS += $(shell $(PKG_CONFIG) --libs simavr-avr)
 endif
 
@@ -183,7 +183,7 @@ define MAKE_DEP_ROOT_DIR_VAR
 	export $$(shell echo $(1) | sed 's/[- ]/_/g' | tr 'a-z' 'A-Z')_ROOT_DIR := $(LIB_DIR)/$(1)
 endef
 
-$(DEP_LIBS_MODULES):
+$($$(PROJECT_PREFIX)_DEP_LIBS_MODULES):
 	$(BUILD_DEP_LIBS)
 
 %.o: %.S
