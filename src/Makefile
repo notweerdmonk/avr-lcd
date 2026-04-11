@@ -37,10 +37,10 @@ include $(PROJECT_ROOT)/avr-lcd.mk
 
 include $(PROJECT_ROOT)/Makefile.common
 
-$(foreach d, $($$(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_LIB_DIR_VAR,$(d))))
-$(foreach d, $($$(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_ROOT_DIR_VAR,$(d))))
+$(foreach d, $($(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_LIB_DIR_VAR,$(d))))
+$(foreach d, $($(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(eval $(call MAKE_DEP_ROOT_DIR_VAR,$(d))))
 
--include $(foreach d, $($$(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/$(d).mk)
+-include $(foreach d, $($(PROJECT_PREFIX)_DEP_LIBS_MODULES), $(LIB_DIR)/$(d)/$(d).mk)
 
 LIB_NAME = lcd
 LIB = lib$(LIB_NAME).a
@@ -63,7 +63,7 @@ ASSEMBLY_LISTINGS = $(SOURCES:.c=.lst)
 
 all: $(LIB_DIR)/$(LIB)
 
-$(OBJECTS): $(DEP_SOURCES) $($$(PROJECT_PREFIX)_INCLUDE_HEADERS)
+$(OBJECTS): $(DEP_SOURCES) $($(PROJECT_PREFIX)_INCLUDE_HEADERS)
 
 $(LIB): $(OBJECTS)
 	$(ARCHIVE) $(LIB) $(OBJECTS)
