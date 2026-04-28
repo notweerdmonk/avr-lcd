@@ -88,20 +88,33 @@ void avr_lcd_put_char(char c) {
   if (lcd.CURX >= AVR_LCD_COLS) {
     lcd.CURX = 0;
 
-    if (lcd.CURY == (AVR_LCD_ROWS - 1)) {
-      lcd.CURY = lcd.vscroll ? AVR_LCD_ROWS - 1 : 0;
-    } else {
-      ++lcd.CURY;
-    }
+#ifdef AVR_LCD_BUFFERED
 
     if (lcd.row_anchor) {
       lcd.row_anchor = (lcd.row_anchor + 1) % AVR_LCD_ROWS;
     }
 
+    if (lcd.CURY == (AVR_LCD_ROWS - 1)) {
+      if (lcd.vscroll) {
+        avr_lcd_set_cursor(AVR_LCD_ROWS, 0);
+      } else {
+        lcd.CURY = 0;
+      }
+    } else {
+      ++lcd.CURY;
+    }
+
+#else
+
+    if (++lcd.CURY == AVR_LCD_ROWS) {
+        lcd.CURY = 0;
+    }
+
+#endif
+
 #ifndef AVR_LCD_BUFFERED
     LCD_PREFIX(set_cursor)(lcd.CURY, lcd.CURX);
 #endif
-
   }
 
 #ifdef AVR_LCD_BUFFERED
@@ -203,21 +216,34 @@ void avr_lcd_set_cursor(uint8_t row, uint8_t col) {
   lcd.CURX = col < AVR_LCD_COLS ? col : AVR_LCD_COLS - 1;
   lcd.CURY = row < AVR_LCD_ROWS ? row : AVR_LCD_ROWS - 1;
 
-  if (lcd.vscroll && row >= AVR_LCD_ROWS) {
+#ifndef AVR_LCD_BUFFERED
+
+  LCD_PREFIX(set_cursor)(row, col);
+
+#else
+
+  if (!lcd.vscroll) {
+    return;
+  }
+
+  if (row < AVR_LCD_ROWS) {
+    lcd.row_anchor = 0;
+  } else {
     lcd.update = false;
 
     row = (row % AVR_LCD_ROWS) + lcd.row_anchor;
-    uint8_t row_anchor = (row + 1) % AVR_LCD_ROWS;
+    uint8_t prev_row_anchor = lcd.row_anchor;
+    lcd.row_anchor = (row + 1) % AVR_LCD_ROWS;
 
     for (uint8_t r = 0, clear_row = 0; r < AVR_LCD_ROWS; r++) {
       if (
           (
-            row_anchor > lcd.row_anchor &&
-            r >= lcd.row_anchor && r < row_anchor
+            lcd.row_anchor > prev_row_anchor &&
+            r >= prev_row_anchor && r < lcd.row_anchor
           ) ||
           (
-            row_anchor < lcd.row_anchor &&
-            (r >= lcd.row_anchor || r < row_anchor)
+            lcd.row_anchor < prev_row_anchor &&
+            (r >= prev_row_anchor || r < lcd.row_anchor)
           )
       ) {
         clear_row = 1;
@@ -231,13 +257,9 @@ void avr_lcd_set_cursor(uint8_t row, uint8_t col) {
       clear_row = 0;
     }
 
-    lcd.row_anchor = row_anchor;
-
     lcd.update = true;
   }
 
-#ifndef AVR_LCD_BUFFERED
-  LCD_PREFIX(set_cursor)(row, col);
 #endif
 }
 
